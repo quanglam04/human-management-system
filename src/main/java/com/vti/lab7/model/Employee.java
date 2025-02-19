@@ -27,13 +27,13 @@ public class Employee {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long employee_id;
-	private String first_name;
-	private String last_name;
-	private Date date_of_birth;
-	private String phone_number;
+	private long employeeId;
+	private String firstName;
+	private String lastName;
+	private Date dateOfBirth;
+	private String phoneNumber;
 	private String address;
-	private Date hire_date;
+	private Date hireDate;
 	private float salary;
 	private String status;
 
