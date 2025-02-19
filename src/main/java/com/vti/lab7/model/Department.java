@@ -28,8 +28,8 @@ public class Department {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long department_id;
-	private String department_name;
+	private long departmentId;
+	private String departmentName;
 	private String description;
 
 	@OneToMany(mappedBy = "department", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
