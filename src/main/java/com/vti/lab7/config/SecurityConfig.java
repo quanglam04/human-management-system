@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,7 +15,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,8 +23,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.vti.lab7.config.jwt.JwtAuthenticationEntryPoint;
 import com.vti.lab7.config.jwt.JwtAuthenticationFilter;
+import com.vti.lab7.exception.AuthExceptionHandler;
 import com.vti.lab7.service.impl.CustomUserDetailsServiceImpl;
 
 import java.util.Arrays;
@@ -34,9 +32,9 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@EnableMethodSecurity
 public class SecurityConfig {
 
 	private static final String[] WHITE_LIST_URL = { "/api/v1/users/login", "/api/v1/users/refresh-token", };
@@ -44,6 +42,8 @@ public class SecurityConfig {
 	CustomUserDetailsServiceImpl userDetailsService;
 
 	JwtAuthenticationFilter jwtAuthenticationFilter;
+
+	AuthExceptionHandler authExceptionHandler;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -71,7 +71,8 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-				.exceptionHandling(exception -> exception.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+				.exceptionHandling(ex -> ex.authenticationEntryPoint(authExceptionHandler)
+						.accessDeniedHandler(authExceptionHandler));
 		return http.build();
 	}
 

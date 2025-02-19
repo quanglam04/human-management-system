@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.context.MessageSource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,7 +21,6 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService, Custome
 
 	UserRepository userRepository;
 
-	MessageSource messageSource;
 
 	@Override
 	@Transactional
