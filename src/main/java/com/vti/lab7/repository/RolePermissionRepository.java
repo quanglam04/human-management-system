@@ -1,0 +1,12 @@
+package com.vti.lab7.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.vti.lab7.model.RolePermission;
+import com.vti.lab7.model.RolePermissionId;
+
+@Repository
+public interface RolePermissionRepository extends JpaRepository<RolePermission, RolePermissionId> {
+
+}
