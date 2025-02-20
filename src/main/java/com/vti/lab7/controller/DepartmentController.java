@@ -27,18 +27,21 @@ public class DepartmentController {
 	private DepartmentService departmentService;
 
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAuthority('get_department_by_id')")
 	public ResponseEntity<Department> findDepartment(@PathVariable Long id) {
 		Optional<Department> departmentOptional = departmentService.findDepartment(id);
 		return departmentOptional.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
 	@PostMapping()
+	@PreAuthorize("hasAuthority('create_new_department')")
 	public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
 		Department savedDepartment = departmentService.save(department);
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedDepartment);
 	}
 
 	@GetMapping()
+	@PreAuthorize("hasAuthority('get_all_departments')")
 	public ResponseEntity<List<Department>> findAll() {
 		List<Department> departments = departmentService.findAll();
 		if (departments.isEmpty()) {
@@ -48,6 +51,7 @@ public class DepartmentController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAuthority('update_department')")
 	public ResponseEntity<Department> updateDepartment(@PathVariable long id, @RequestBody Department department) {
 		Optional<Department> optionalDepartment = departmentService.findDepartment(id);
 
@@ -66,6 +70,7 @@ public class DepartmentController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAuthority('delete_department_by_id')")
 	public void delete( Department department) {
 		departmentService.delete(department);
 	}

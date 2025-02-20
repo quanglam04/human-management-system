@@ -1,6 +1,7 @@
 package com.vti.lab7.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -33,4 +34,35 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 			}
 		}
 	}
+
+	@Override
+	public List<RolePermission> findAll() {
+		return rolePermissionRepository.findAll();
+	}
+
+	@Override
+	public Optional<RolePermission> getPermissionById(RolePermissionId rolePermissionId) {
+		return rolePermissionRepository.findPermissionById(rolePermissionId.getPermissionId(),
+				rolePermissionId.getRoleId());
+	}
+
+	@Override
+	public RolePermission update(RolePermission rolePermission) {
+		return rolePermissionRepository.save(rolePermission);
+	}
+
+	public int delete(RolePermissionId rolePermissionId) {
+		return rolePermissionRepository.deleteRolePermission(rolePermissionId.getPermissionId(),
+				rolePermissionId.getRoleId());
+
+	}
+
+	@Override
+	public RolePermission save(RolePermission rolePermission) {
+		return rolePermissionRepository.save(rolePermission);
+	}
+
+	 public List<RolePermission> getPermissionsByRoleId(Long roleId) {
+	        return rolePermissionRepository.findById_RoleId(roleId);
+	    }
 }
