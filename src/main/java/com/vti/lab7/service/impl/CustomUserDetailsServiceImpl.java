@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,9 +21,10 @@ import com.vti.lab7.service.CustomeUserDetailService;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CustomUserDetailsServiceImpl implements UserDetailsService, CustomeUserDetailService {
-
+	
+	@Autowired
 	UserRepository userRepository;
-
+	@Autowired
 	MessageSource messageSource;
 
 	@Override
