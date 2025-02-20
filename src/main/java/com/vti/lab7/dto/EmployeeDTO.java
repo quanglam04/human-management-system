@@ -25,22 +25,24 @@ public class EmployeeDTO {
 	private String lastName;
 
 	@NotNull(message = "Date of birth is required")
+	@Past(message = "Date of birth must be in the past")
 	private Date dateOfBirth;
 
 	@NotBlank(message = "Phone number must be 10 digits")
+	@Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
 	private String phoneNumber;
 
 	@Size(max = 255, message = "Address must not exceed 255 characters")
 	private String address;
 
 	@NotNull(message = "Hire date is required")
+	@PastOrPresent(message = "Hire date cannot be in the future")
 	private Date hireDate;
 
 	@Positive(message = "Salary must be positive")
 	private BigDecimal salary;
 
 	@NotBlank(message = "Status is required")
-	@Pattern(regexp = "^(ACTIVE|INACTIVE)$", message = "Status must be either ACTIVE or INACTIVE")
 	private String status;
 
 	@NotNull(message = "User ID is required")
@@ -51,4 +53,12 @@ public class EmployeeDTO {
 
 	@NotNull(message = "Department ID is required")
 	private Long departmentId;
+
+	@AssertTrue(message = "Hire date must be after date of birth")
+	public boolean isHireDateValid() {
+		if (dateOfBirth != null && hireDate != null) {
+			return hireDate.toLocalDate().isAfter(dateOfBirth.toLocalDate());
+		}
+		return true;
+	}
 }
