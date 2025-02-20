@@ -23,8 +23,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.vti.lab7.config.jwt.JwtAuthenticationEntryPoint;
 import com.vti.lab7.config.jwt.JwtAuthenticationFilter;
+import com.vti.lab7.exception.AuthExceptionHandler;
 import com.vti.lab7.service.impl.CustomUserDetailsServiceImpl;
 
 import java.util.Arrays;
@@ -32,9 +32,9 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@EnableMethodSecurity
 public class SecurityConfig {
 
 	private static final String[] WHITE_LIST_URL = { "/api/v1/users/login", "/api/v1/users/refresh-token", };
@@ -42,6 +42,8 @@ public class SecurityConfig {
 	CustomUserDetailsServiceImpl userDetailsService;
 
 	JwtAuthenticationFilter jwtAuthenticationFilter;
+
+	AuthExceptionHandler authExceptionHandler;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -69,7 +71,8 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-				.exceptionHandling(exception -> exception.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+				.exceptionHandling(ex -> ex.authenticationEntryPoint(authExceptionHandler)
+						.accessDeniedHandler(authExceptionHandler));
 		return http.build();
 	}
 

@@ -28,8 +28,8 @@ public class Position {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long position_id;
-	private String position_name;
+	private long positionId;
+	private String positionName;
 
 	@OneToMany(mappedBy = "position", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
 	@JsonIgnore
