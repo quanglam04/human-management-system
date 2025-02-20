@@ -10,6 +10,8 @@ import com.vti.lab7.model.Department;
 import com.vti.lab7.repository.DepartmentRepository;
 import com.vti.lab7.service.IDeparmentService;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class DepartmentService implements IDeparmentService {
 
@@ -35,9 +37,13 @@ public class DepartmentService implements IDeparmentService {
 	public Department update(Department department) {
 		return departmentRepository.save(department);
 	}
+
 	@Override
-	public void delete(Department department) {
-		departmentRepository.delete(department);
+	public void deleteDepartment(Long id) {
+		if (!departmentRepository.existsById(id)) {
+			throw new EntityNotFoundException("Department not found with ID: " + id);
+		}
+		departmentRepository.deleteById(id);
 	}
 
 }

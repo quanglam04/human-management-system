@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vti.lab7.dto.response.RestData;
 import com.vti.lab7.model.Department;
 import com.vti.lab7.service.impl.DepartmentService;
 
@@ -59,20 +60,23 @@ public class DepartmentController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
 
-		Department existingDepartment = optionalDepartment.get(); 
+		Department existingDepartment = optionalDepartment.get();
 		existingDepartment.setDepartmentName(department.getDepartmentName());
 		existingDepartment.setDescription(department.getDescription());
 
-	
 		departmentService.save(existingDepartment);
 
 		return ResponseEntity.ok(existingDepartment);
 	}
-
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('delete_department_by_id')")
-	public void delete( Department department) {
-		departmentService.delete(department);
-	}
+	public ResponseEntity<Object> deleteDepartment(@PathVariable Long id) {
+		departmentService.deleteDepartment(id);
+		RestData<?> restData = new RestData<>(200, null, null, true);
+		return ResponseEntity.ok().body(restData);
 
+	}
+	
+	
+	
 }
