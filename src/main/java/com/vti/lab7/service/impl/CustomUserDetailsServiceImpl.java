@@ -21,10 +21,9 @@ import com.vti.lab7.service.CustomeUserDetailService;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CustomUserDetailsServiceImpl implements UserDetailsService, CustomeUserDetailService {
-	
-	@Autowired
+
 	UserRepository userRepository;
-	@Autowired
+
 	MessageSource messageSource;
 
 	@Override

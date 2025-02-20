@@ -7,6 +7,7 @@ import com.vti.lab7.config.CustomUserDetails;
 import com.vti.lab7.config.jwt.JwtTokenProvider;
 import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.dto.request.LoginRequestDto;
+import com.vti.lab7.dto.request.NewUserRequest;
 import com.vti.lab7.dto.request.UserRequest;
 import com.vti.lab7.dto.response.LoginResponseDto;
 import com.vti.lab7.dto.response.UserResponse;
@@ -31,20 +32,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-	
 	private final UserRepository userRepository;
-	
 	private final RoleRepository roleRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
-	private final MessageSource messageSource;
 
 	public void init() {
 		if (userRepository.count() == 0) {
 			User user = new User();
 			user.setUsername("hiep");
 			user.setPassword(passwordEncoder.encode("1234"));
+			user.setEmail("hiep@example.com");
 			user.setRole(roleRepository.findByRoleName("ADMIN"));
 			userRepository.save(user);
 			User user2 = new User();
@@ -59,7 +58,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			Authentication authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-			System.out.println(request.getUsername());
+
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 			
@@ -85,12 +84,25 @@ public class UserServiceImpl implements UserService {
 
         Page<User> users = userRepository.findAllUsers(request.getUsername(), request.getEmail(), pageable);
 
-        return users.map(user -> new UserResponse(
-                user.getUserId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getRole()
-        ));
+        return users.map(user -> new UserResponse(user));
+	}
+
+	@Override
+	public UserResponse getUserById(UserRequest request) {
+		User user = userRepository.findByUserId(request.getUserId()).orElse(new User());
+		return new UserResponse(user);
+	}
+
+	@Override
+	public UserResponse postNewUser(NewUserRequest request) {
+		User user = new User();
+		user.setUsername(request.getUsername());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
+		user.setEmail(request.getEmail());
+		user.setRole(roleRepository.findByRoleName("EMPLOYER"));
+		userRepository.save(user);
+		
+		return new UserResponse(user);
 	}
 
 }
