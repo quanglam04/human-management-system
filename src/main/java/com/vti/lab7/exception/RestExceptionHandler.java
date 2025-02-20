@@ -71,8 +71,7 @@ public class RestExceptionHandler {
 
 	// Not found url handler
 	@ExceptionHandler(NoHandlerFoundException.class)
-	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException exception,
-			HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException exception) {
 		String message = getMessage("NoHandlerFoundException.message") + exception.getHttpMethod() + " "
 				+ exception.getRequestURL();
 		String detailMessage = exception.getLocalizedMessage();
@@ -81,14 +80,13 @@ public class RestExceptionHandler {
 
 		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
 		log.error(detailMessage, exception);
-		return new ResponseEntity<>(response, status);
+		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
 
 	// Not support HTTP Method
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
-			HttpRequestMethodNotSupportedException exception, HttpHeaders headers, HttpStatusCode status,
-			WebRequest request) {
+			HttpRequestMethodNotSupportedException exception) {
 		String message = getMessageFromHttpRequestMethodNotSupportedException(exception);
 		String detailMessage = exception.getLocalizedMessage();
 		int code = 405;
@@ -96,7 +94,7 @@ public class RestExceptionHandler {
 
 		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
 		log.error(detailMessage, exception);
-		return new ResponseEntity<>(response, status);
+		return new ResponseEntity<>(response, HttpStatus.METHOD_NOT_ALLOWED);
 	}
 
 	private String getMessageFromHttpRequestMethodNotSupportedException(
@@ -110,8 +108,7 @@ public class RestExceptionHandler {
 
 	// Not support media type
 	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-	protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException exception,
-			HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+	protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException exception) {
 		String message = getMessageFromHttpMediaTypeNotSupportedException(exception);
 		String detailMessage = exception.getLocalizedMessage();
 		int code = 415;
@@ -119,7 +116,7 @@ public class RestExceptionHandler {
 
 		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
 		log.error(detailMessage, exception);
-		return new ResponseEntity<>(response, status);
+		return new ResponseEntity<>(response, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 	}
 
 	private String getMessageFromHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException exception) {
@@ -134,8 +131,7 @@ public class RestExceptionHandler {
 	// MethodArgumentNotValidException: This exception is thrown when argument
 	// annotated with @Valid failed validation:
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
-			HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
 		String message = getMessage("MethodArgumentNotValidException.message");
 		String detailMessage = exception.getLocalizedMessage();
 		// error
@@ -150,7 +146,7 @@ public class RestExceptionHandler {
 
 		ErrorResponse response = new ErrorResponse(message, detailMessage, errors, code, moreInformation);
 		log.error(detailMessage + "\n" + errors.toString(), exception);
-		return new ResponseEntity<>(response, status);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 
 	// bean validation error
@@ -180,8 +176,7 @@ public class RestExceptionHandler {
 	// request missing parameter:
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	protected ResponseEntity<Object> handleMissingServletRequestParameter(
-			MissingServletRequestParameterException exception, HttpHeaders headers, HttpStatusCode status,
-			WebRequest request) {
+			MissingServletRequestParameterException exception) {
 		String message = exception.getParameterName() + " "
 				+ getMessage("MissingServletRequestParameterException.message");
 		String detailMessage = exception.getLocalizedMessage();
@@ -190,14 +185,14 @@ public class RestExceptionHandler {
 
 		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
 		log.error(detailMessage, exception);
-		return new ResponseEntity<>(response, status);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 
 	// TypeMismatchException: This exception is thrown when try to set bean property
 	// with wrong type.
 	// MethodArgumentTypeMismatchException: This exception is thrown when method
 	// argument is not the expected type:
-	@ExceptionHandler({ MethodArgumentTypeMismatchException.class })
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<Object> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception) {
 		String message = exception.getName() + " " + getMessage("MethodArgumentTypeMismatchException.message")
 				+ exception.getRequiredType().getName();
