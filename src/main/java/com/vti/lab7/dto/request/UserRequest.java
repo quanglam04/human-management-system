@@ -12,8 +12,11 @@ import lombok.Setter;
 public class UserRequest {
     private int page = 1;  
     private int size = 10; 
+    private long userId;
     private String username;
     private String email;
+    private String password;
     private String sortBy = "id"; 
     private String sortDirection = "asc"; 
+    
 }

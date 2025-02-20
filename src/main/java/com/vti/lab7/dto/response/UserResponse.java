@@ -1,6 +1,7 @@
 package com.vti.lab7.dto.response;
 
 import com.vti.lab7.model.Role;
+import com.vti.lab7.model.User;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,10 +14,10 @@ public class UserResponse {
     private String email;
     private String roleName; 
 
-    public UserResponse(long userId, String username, String email, Role role) {
-        this.userId = userId;
-        this.username = username;
-        this.email = email;
-        this.roleName = role.getRoleName();
+    public UserResponse(User user) {
+        this.userId = user.getUserId();
+        this.username = user.getUsername();
+        this.email = user.getEmail();
+        this.roleName = user.getRole().getRoleName();
     }
 }
