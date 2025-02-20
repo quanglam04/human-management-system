@@ -230,6 +230,7 @@ public class RestExceptionHandler {
 		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
 		log.error(detailMessage, exception);
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
