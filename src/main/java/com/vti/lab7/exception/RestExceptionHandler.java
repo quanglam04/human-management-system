@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -217,6 +218,7 @@ public class RestExceptionHandler {
 		log.error(detailMessage, exception);
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
+
 	
 	@ExceptionHandler(IdInvalidException.class)
 	public ResponseEntity<Object> handleIdNotExist(IdInvalidException exception) {
@@ -228,5 +230,17 @@ public class RestExceptionHandler {
 		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
 		log.error(detailMessage, exception);
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+		String message = getMessage("HttpMessageNotReadableException.message");
+		String detailMessage = exception.getLocalizedMessage();
+		int code = 400;
+		String moreInformation = "http://localhost:8080/api/v1/exception/400";
+
+		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
+		log.error(detailMessage, exception);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
 	}
 }
