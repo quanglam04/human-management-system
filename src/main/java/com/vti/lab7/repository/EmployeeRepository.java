@@ -1,11 +1,18 @@
 package com.vti.lab7.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import com.vti.lab7.model.Employee;
 
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSpecificationExecutor<Employee> {
+
+	List<Employee> findByDepartmentDepartmentId(Long departmentId);
+
+	List<Employee> findByPositionPositionId(Long positionId);
 
 }
