@@ -9,6 +9,7 @@ import com.vti.lab7.dto.response.PaginationResponseDto;
 import com.vti.lab7.dto.response.RestData;
 import com.vti.lab7.service.EmployeeService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -38,14 +39,14 @@ public class EmployeeController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Object> createEmployee(@RequestBody EmployeeDTO employee) {
+	public ResponseEntity<Object> createEmployee(@Valid @RequestBody EmployeeDTO employee) {
 		EmployeeDTO responseDto = employeeService.createEmployee(employee);
 		RestData<?> restData = new RestData<>(200, null, null, responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Object> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO employee) {
+	public ResponseEntity<Object> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employee) {
 		EmployeeDTO responseDto = employeeService.updateEmployee(id, employee);
 		RestData<?> restData = new RestData<>(200, null, null, responseDto);
 		return ResponseEntity.ok().body(restData);
