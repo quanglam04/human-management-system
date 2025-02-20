@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vti.lab7.dto.request.LoginRequestDto;
+import com.vti.lab7.dto.response.LoginResponseDto;
+import com.vti.lab7.dto.response.RestData;
 import com.vti.lab7.service.UserService;
 
 import jakarta.validation.Valid;
@@ -22,13 +24,10 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDto request) {
-		return ResponseEntity.ok().body(userService.login(request));
+	public ResponseEntity<RestData<?>> login(@Valid @RequestBody LoginRequestDto request) {
+		LoginResponseDto responseDto = userService.login(request);
+		RestData<?> restData = new RestData<>(200, null, null, responseDto);
+		return ResponseEntity.ok().body(restData);
 	}
-
-	@GetMapping("/login2")
-	@PreAuthorize("hasAuthority('get_all_users')")
-	public ResponseEntity<?> login2() {
-		return ResponseEntity.ok().body("fdfsdfsdf");
-	}
+	
 }
