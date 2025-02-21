@@ -9,10 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.vti.lab7.model.Permission;
-import com.vti.lab7.model.Role;
 import com.vti.lab7.model.RolePermission;
 import com.vti.lab7.model.RolePermissionId;
-
 import jakarta.transaction.Transactional;
 
 @Repository
@@ -31,7 +29,6 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
 	@Query("SELECT p FROM Permission p JOIN RolePermission rp ON p.permissionId = rp.id.permissionId WHERE rp.id.roleId = ?1")
 	List<Permission> findPermissionsByRoleId(Long roleId);
 
-	@Query("SELECT r FROM Role r JOIN RolePermission rp ON r.roleId = rp.id.roleId WHERE rp.id.permissionId = ?1")
-	List<Role> findRolesByPermissionId(Long permissionId);
+
 
 }
