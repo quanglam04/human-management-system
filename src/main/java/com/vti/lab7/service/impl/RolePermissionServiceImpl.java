@@ -36,11 +36,21 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	public void init() {
 		if (rolePermissionRepository.count() == 0) {
 			Role admin = roleRepository.findByRoleName("ADMIN");
-			List<Permission> permissions = permissionRepository.findAll();
+			List<Permission> adminPermissions = permissionRepository.findAll();
 
-			for (Permission p : permissions) {
-				rolePermissionRepository.save(
-						new RolePermission(new RolePermissionId(admin.getRoleId(), p.getPermissionId()), admin, p));
+			for (Permission permission : adminPermissions) {
+				rolePermissionRepository.save(new RolePermission(
+						new RolePermissionId(admin.getRoleId(), permission.getPermissionId()), admin, permission));
+			}
+
+			Role manager = roleRepository.findByRoleName("ADMIN");
+			List<Permission> managerPermissions = permissionRepository
+					.findByPermissionNameIn(List.of("employee.read", "employee.create", "employee.update",
+							"employee.delete", "employee.department.read", "employee.position.read"));
+
+			for (Permission permission : managerPermissions) {
+				rolePermissionRepository.save(new RolePermission(
+						new RolePermissionId(manager.getRoleId(), permission.getPermissionId()), manager, permission));
 			}
 		}
 	}
