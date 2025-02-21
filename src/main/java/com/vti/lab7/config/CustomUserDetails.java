@@ -1,17 +1,14 @@
 package com.vti.lab7.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vti.lab7.model.RolePermission;
 
 import lombok.Getter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
+
 import java.util.Collection;
-import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -24,18 +21,18 @@ public class CustomUserDetails implements UserDetails {
 	@JsonIgnore
 	private final String password;
 
+	@Getter
+	private final String roleName;
+
 	private final Collection<? extends GrantedAuthority> authorities;
 
-	public CustomUserDetails(long userId, String username, String password, List<RolePermission> rolePermissions) {
+	public CustomUserDetails(long userId, String username, String password, String roleName,
+			Collection<? extends GrantedAuthority> authorities) {
 		this.userId = userId;
 		this.username = username;
 		this.password = password;
-
-		List<GrantedAuthority> tempAuthorities = new ArrayList<>();
-		for (RolePermission role : rolePermissions) {
-			tempAuthorities.add(new SimpleGrantedAuthority(role.getPermission().getPermissionName()));
-		}
-		this.authorities = tempAuthorities;
+		this.roleName = roleName;
+		this.authorities = authorities;
 	}
 
 	@Override

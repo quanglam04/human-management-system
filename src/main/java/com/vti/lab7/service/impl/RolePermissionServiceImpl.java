@@ -67,8 +67,8 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	@Override
 	public Optional<RolePermission> getPermissionById(RolePermissionId rolePermissionId) {
 		return Optional.ofNullable(rolePermissionRepository
-				.findPermissionById(rolePermissionId.getPermissionId(), rolePermissionId.getRoleId()).orElseThrow(
-					() -> new EntityNotFoundException(getMessage("error.rolePermission.notfound"))));
+				.findPermissionById(rolePermissionId.getPermissionId(), rolePermissionId.getRoleId())
+				.orElseThrow(() -> new EntityNotFoundException(getMessage("error.rolePermission.notfound"))));
 	}
 
 	@Override
@@ -101,19 +101,5 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 				rolePermissionId.getRoleId());
 	}
 
-	public List<RolePermission> getPermissionsByRoleId(Long roleId) {
-		return rolePermissionRepository.findById_RoleId(roleId);
-	}
-
-	@Override
-	public List<Permission> findPermissionsByRoleId(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Role> findRolesByPermissionId(Long permissionId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 }

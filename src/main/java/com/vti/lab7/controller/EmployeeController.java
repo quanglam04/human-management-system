@@ -2,7 +2,9 @@ package com.vti.lab7.controller;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
 
 import com.vti.lab7.dto.EmployeeDTO;
@@ -21,8 +23,11 @@ import java.util.List;
 public class EmployeeController {
 
 	private final EmployeeService employeeService;
-
 	@PreAuthorize("hasAuthority('employee.read')")
+
+
+	@PreAuthorize("hasAuthority('read_employee')")
+
 	@GetMapping
 	public ResponseEntity<Object> getAllEmployees(@RequestParam(required = false) String firstName,
 			@RequestParam(required = false) String lastName, @RequestParam(required = false) String phoneNumber,
@@ -33,7 +38,12 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
+
 	@PreAuthorize("hasAuthority('employee.read')")
+
+
+	@PreAuthorize("hasAuthority('read_employee')")
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Object> getEmployeeById(@PathVariable Long id) {
 		EmployeeDTO responseDto = employeeService.getEmployeeById(id);
@@ -41,7 +51,13 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
+
+
 	@PreAuthorize("hasAuthority('employee.create')")
+
+
+	@PreAuthorize("hasAuthority('create_employee')")
+
 	@PostMapping
 	public ResponseEntity<Object> createEmployee(@Valid @RequestBody EmployeeDTO employee) {
 		EmployeeDTO responseDto = employeeService.createEmployee(employee);
@@ -49,7 +65,7 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('employee.update')")
+	@PreAuthorize("hasAuthority('update_employee')")
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employee) {
 		EmployeeDTO responseDto = employeeService.updateEmployee(id, employee);
@@ -57,7 +73,12 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
+
+
 	@PreAuthorize("hasAuthority('employee.delete')")
+
+	@PreAuthorize("hasAuthority('delete_employee')")
+
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> deleteEmployee(@PathVariable Long id) {
 		employeeService.deleteEmployee(id);
@@ -66,7 +87,11 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
+
 	@PreAuthorize("hasAuthority('employee.department.read')")
+
+
+	@PreAuthorize("hasAuthority('read_employee')")
 	@GetMapping("/department/{departmentId}")
 	public ResponseEntity<Object> getEmployeesByDepartment(@PathVariable Long departmentId) {
 		List<EmployeeDTO> responseDto = employeeService.getEmployeesByDepartment(departmentId);
@@ -74,7 +99,12 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
+
 	@PreAuthorize("hasAuthority('employee.position.read')")
+
+
+	@PreAuthorize("hasAuthority('read_employee')")
+
 	@GetMapping("/position/{positionId}")
 	public ResponseEntity<Object> getEmployeesByPosition(@PathVariable Long positionId) {
 		List<EmployeeDTO> responseDto = employeeService.getEmployeesByPosition(positionId);
