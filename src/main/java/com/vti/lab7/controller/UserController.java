@@ -29,5 +29,5 @@ public class UserController {
 		RestData<?> restData = new RestData<>(200, null, null, responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
-	
+
 }

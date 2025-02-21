@@ -2,19 +2,22 @@ package com.vti.lab7.service.impl;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.vti.lab7.dto.PermissionDTO;
+import com.vti.lab7.dto.mapper.PermissionMapper;
 import com.vti.lab7.model.Permission;
 import com.vti.lab7.repository.PermissionRepository;
 import com.vti.lab7.service.PermissionService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class PermissionServiceImpl implements PermissionService {
-
-	private List<String> permission_names = List.of("get_all_users", "get_department_users", "get_own_info",
+	private static final List<String> permissionNames = List.of("get_all_users", "get_department_users", "get_own_info",
 			"get_user_by_id", "get_department_user_by_id", "create_user_any_role", "create_employee_in_department",
 
 			"update_any_user", "update_department_user", "update_own_info", "delete_any_user", "get_all_departments",
@@ -25,7 +28,7 @@ public class PermissionServiceImpl implements PermissionService {
 			"employee.read", "employee.create", "employee.update", "employee.delete", "employee.department.read",
 			"employee.position.read");
 
-	private List<String> descriptions = List.of("Lấy danh sách tất cả người dùng",
+	private static final List<String> descriptions = List.of("Lấy danh sách tất cả người dùng",
 			"Lấy danh sách người dùng thuộc phòng ban của mình", "Lấy thông tin của chính mình",
 			"Lấy thông tin của bất kỳ người dùng nào", "Lấy thông tin của người dùng thuộc phòng ban của mình",
 			"Tạo người dùng mới với bất kỳ vai trò nào",
@@ -44,17 +47,71 @@ public class PermissionServiceImpl implements PermissionService {
 
 	private final PermissionRepository permissionRepository;
 
+	private Permission getEntity(Long id) {
+		return permissionRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(String.format("Permission with ID %d not found.", id)));
+	}
+
+	@Override
 	public void init() {
-		if (permission_names.size() != descriptions.size()) {
+		if (permissionNames.size() != descriptions.size()) {
 			throw new IllegalStateException(
 					"Số lượng permission_names và descriptions không khớp! " + "permission_names.size() = "
-							+ permission_names.size() + ", descriptions.size() = " + descriptions.size());
+							+ permissionNames.size() + ", descriptions.size() = " + descriptions.size());
 		}
 
 		if (permissionRepository.count() == 0) {
-			for (int i = 0; i < permission_names.size(); i++) {
-				permissionRepository.save(new Permission(permission_names.get(i), descriptions.get(i)));
+			for (int i = 0; i < permissionNames.size(); i++) {
+				permissionRepository.save(new Permission(permissionNames.get(i), descriptions.get(i)));
 			}
 		}
 	}
+
+	@Override
+	public List<PermissionDTO> getAllPermissions() {
+		return permissionRepository.findAll().stream().map(PermissionMapper::mapToDTO).toList();
+	}
+
+	@Override
+	public PermissionDTO getPermissionById(Long id) {
+		Permission permission = getEntity(id);
+		return PermissionMapper.mapToDTO(permission);
+	}
+
+	@Override
+	public void deletePermission(Long id) {
+		Permission permission = getEntity(id);
+		permissionRepository.delete(permission);
+	}
+
+	@Override
+	public PermissionDTO createPermission(PermissionDTO permissionDTO) {
+		Permission permission = PermissionMapper.mapToEntity(permissionDTO);
+		if (permissionRepository.existsByPermissionName(permission.getPermissionName())) {
+			throw new DataIntegrityViolationException(
+					String.format("Permission with name '%s' already exists.", permission.getPermissionName()));
+		}
+
+		permissionRepository.save(permission);
+		return PermissionMapper.mapToDTO(permission);
+	}
+
+	@Override
+	public PermissionDTO updatePermission(Long id, PermissionDTO permissionDTO) {
+		Permission existingPermission = getEntity(id);
+
+		if (!existingPermission.getPermissionName().equals(permissionDTO.getPermissionName())
+				&& permissionRepository.existsByPermissionName(permissionDTO.getPermissionName())) {
+			throw new DataIntegrityViolationException(
+					String.format("Permission with name '%s' already exists.", permissionDTO.getPermissionName()));
+		}
+
+		existingPermission.setPermissionName(permissionDTO.getPermissionName());
+		existingPermission.setDescription(permissionDTO.getDescription());
+
+		permissionRepository.save(existingPermission);
+
+		return PermissionMapper.mapToDTO(existingPermission);
+	}
+
 }
