@@ -10,26 +10,26 @@ import com.vti.lab7.repository.PositionRepository;
 import com.vti.lab7.service.PositionService;
 
 import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
-public class PositionServiceImpl implements PositionService{
+public class PositionServiceImpl implements PositionService {
 	private final PositionRepository positionRepository;
 
- 
 	public Position findById(long id) {
 		Optional<Position> positionOptional = positionRepository.findById(id);
-		if(positionOptional.isPresent())
+		if (positionOptional.isPresent())
 			return positionOptional.get();
 		return null;
 	}
-	
-	public List<Position> findAll(){
+
+	public List<Position> findAll() {
 		return positionRepository.findAll();
 	}
 
 	public void deleteById(long id) {
 		Optional<Position> positionOption = positionRepository.findById(id);
-		if(positionOption.isPresent())
+		if (positionOption.isPresent())
 			positionRepository.delete(positionOption.get());
 		return;
 	}
@@ -38,18 +38,15 @@ public class PositionServiceImpl implements PositionService{
 		return positionRepository.save(new Position(name));
 	}
 
-	 
 	public Position updatePosition(Position positionReq) {
 		Optional<Position> positionOptional = positionRepository.findById(positionReq.getPositionId());
-		if(positionOptional.isPresent()) {
-			
-			Position positionUpdate = positionOptional.get();  
-	        positionUpdate.setPositionName(positionReq.getPositionName()); 
-	        return positionRepository.save(positionUpdate);
+		if (positionOptional.isPresent()) {
+
+			Position positionUpdate = positionOptional.get();
+			positionUpdate.setPositionName(positionReq.getPositionName());
+			return positionRepository.save(positionUpdate);
 		}
 		return null;
 	}
-	
-	
-	
+
 }

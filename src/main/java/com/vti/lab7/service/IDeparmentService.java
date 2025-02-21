@@ -17,5 +17,4 @@ public interface IDeparmentService {
 
 	void deleteDepartment(Long id);
 
-
 }

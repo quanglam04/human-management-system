@@ -22,10 +22,11 @@ public class DepartmentService implements IDeparmentService {
 	private String getMessage(String key) {
 		return messageSource.getMessage(key, null, "Default message", LocaleContextHolder.getLocale());
 	}
-/*private String getMessage(String key) {
-	    return messageSource.getMessage(key, null, Locale.JAPAN);
-	}
-*/
+
+	/*
+	 * private String getMessage(String key) { return messageSource.getMessage(key,
+	 * null, Locale.JAPAN); }
+	 */
 	@Autowired
 	private DepartmentRepository departmentRepository;
 

@@ -5,6 +5,6 @@ import com.vti.lab7.model.Position;
 
 public class PositionMapperDTO {
 	public static final PositionDTO convertPositionDTO(Position position) {
-		return new PositionDTO(position.getPositionId(),position.getPositionName());
+		return new PositionDTO(position.getPositionId(), position.getPositionName());
 	}
 }

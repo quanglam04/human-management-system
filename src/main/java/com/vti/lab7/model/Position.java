@@ -27,15 +27,15 @@ import lombok.Setter;
 public class Position {
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "position_id")
-    private Long positionId;
+	private Long positionId;
 
-    @Column(name = "position_name", nullable = false)
-    private String positionName;
-    
+	@Column(name = "position_name", nullable = false)
+	private String positionName;
+
 	public Position(String positionName) {
-		this.positionName = positionName; 
+		this.positionName = positionName;
 	}
 
 	@OneToMany(mappedBy = "position", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)

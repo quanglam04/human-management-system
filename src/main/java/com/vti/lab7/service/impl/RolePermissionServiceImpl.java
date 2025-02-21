@@ -67,8 +67,8 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	@Override
 	public Optional<RolePermission> getPermissionById(RolePermissionId rolePermissionId) {
 		return Optional.ofNullable(rolePermissionRepository
-				.findPermissionById(rolePermissionId.getPermissionId(), rolePermissionId.getRoleId()).orElseThrow(
-					() -> new EntityNotFoundException(getMessage("error.rolePermission.notfound"))));
+				.findPermissionById(rolePermissionId.getPermissionId(), rolePermissionId.getRoleId())
+				.orElseThrow(() -> new EntityNotFoundException(getMessage("error.rolePermission.notfound"))));
 	}
 
 	@Override

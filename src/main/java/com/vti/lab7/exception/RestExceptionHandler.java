@@ -19,6 +19,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import com.vti.lab7.dto.response.ErrorResponse;
+import com.vti.lab7.exception.custom.IdInvalidException;
+
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.FieldError;
 import jakarta.validation.ConstraintViolation;
@@ -212,7 +214,6 @@ public class RestExceptionHandler {
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
 
-	
 	@ExceptionHandler(IdInvalidException.class)
 	public ResponseEntity<Object> handleIdNotExist(IdInvalidException exception) {
 		String message = "ID not exist in Database";

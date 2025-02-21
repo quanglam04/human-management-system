@@ -12,5 +12,5 @@ import lombok.Setter;
 public class PositionDTO {
 	private long positionId;
 	private String positionName;
-	
+
 }
