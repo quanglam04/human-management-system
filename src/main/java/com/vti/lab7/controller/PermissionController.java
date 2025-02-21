@@ -20,6 +20,7 @@ public class PermissionController {
 
 	private final PermissionService permissionService;
 
+	@PreAuthorize("hasAuthority('read_permission')")
 	@GetMapping
 	public ResponseEntity<Object> getAllPermissions() {
 		List<PermissionDTO> responseDto = permissionService.getAllPermissions();
@@ -27,6 +28,7 @@ public class PermissionController {
 		return ResponseEntity.ok().body(restData);
 	}
 
+	@PreAuthorize("hasAuthority('read_permission')")
 	@GetMapping("/{id}")
 	public ResponseEntity<Object> getPermissionById(@PathVariable Long id) {
 		PermissionDTO responseDto = permissionService.getPermissionById(id);
@@ -34,6 +36,7 @@ public class PermissionController {
 		return ResponseEntity.ok().body(restData);
 	}
 
+	@PreAuthorize("hasAuthority('create_permission')")
 	@PostMapping
 	public ResponseEntity<Object> createPermission(@Valid @RequestBody PermissionDTO permissionDTO) {
 		PermissionDTO responseDto = permissionService.createPermission(permissionDTO);
@@ -41,6 +44,7 @@ public class PermissionController {
 		return ResponseEntity.ok().body(restData);
 	}
 
+	@PreAuthorize("hasAuthority('update_permission')")
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> updatePermission(@PathVariable Long id,
 			@Valid @RequestBody PermissionDTO permissionDTO) {
@@ -49,6 +53,7 @@ public class PermissionController {
 		return ResponseEntity.ok().body(restData);
 	}
 
+	@PreAuthorize("hasAuthority('delete_permission')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> deletePermission(@PathVariable Long id) {
 		permissionService.deletePermission(id);

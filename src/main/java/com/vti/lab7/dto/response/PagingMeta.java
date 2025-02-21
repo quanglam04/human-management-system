@@ -12,18 +12,18 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PagingMeta {
 
-    private Long totalElements;
+	private Long totalElements;
 
-    private Integer totalPages;
+	private Integer totalPages;
 
-    private Integer pageNum;
+	private Integer pageNum;
 
-    private Integer pageSize;
+	private Integer pageSize;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String sortBy;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String sortBy;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String sortType;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String sortType;
 
 }
