@@ -2,15 +2,17 @@ package com.vti.lab7.service;
 
 import java.util.List;
 
-import com.vti.lab7.dto.PermissionDTO;
 import com.vti.lab7.model.Role;
 
+import com.vti.lab7.dto.PermissionDTO;
+
 public interface PermissionService {
+	
+	List<Role> findRolesByPermissionId(Long permissionId);
+
 	public void init();
 
 	public List<PermissionDTO> getAllPermissions();
-
-	List<Role> findRolesByPermissionId(Long permissionId);
 
 	public PermissionDTO getPermissionById(Long id);
 

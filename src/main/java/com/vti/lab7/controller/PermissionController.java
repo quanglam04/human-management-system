@@ -63,7 +63,6 @@ public class PermissionController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-	
 	@PostMapping("/{permissionId}/roles")
 	@PreAuthorize("hasAuthority('get_role_by_permissions_id')")
 	public ResponseEntity<List<Role>> getListRolesByPermissionId(@PathVariable Long permissionId) {

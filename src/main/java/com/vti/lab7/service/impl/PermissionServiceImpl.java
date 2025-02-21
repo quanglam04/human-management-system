@@ -58,6 +58,7 @@ public class PermissionServiceImpl implements PermissionService {
 			"Lấy danh sách tất cả các vai trò", "Lấy thông tin chi tiết của 1 vai trò theo ID", "Tạo một vai trò mới",
 			"Cập nhật thông tin vai trò theo ID", "Xóa một vai trò theo ID");
 
+
 	private final PermissionRepository permissionRepository;
 
 	private Permission getEntity(Long id) {
@@ -81,7 +82,6 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 
 	@Override
-
 	public List<Role> findRolesByPermissionId(Long permissionId) {
 		List<Role> permissions = permissionRepository.findRolesByPermissionId(permissionId);
 		if (permissions.isEmpty()) {

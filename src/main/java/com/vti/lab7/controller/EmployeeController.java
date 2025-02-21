@@ -22,7 +22,7 @@ public class EmployeeController {
 
 	private final EmployeeService employeeService;
 
-	@PreAuthorize("hasAuthority('read_employee')")
+	@PreAuthorize("hasAuthority('employee.read')")
 	@GetMapping
 	public ResponseEntity<Object> getAllEmployees(@RequestParam(required = false) String firstName,
 			@RequestParam(required = false) String lastName, @RequestParam(required = false) String phoneNumber,
@@ -33,7 +33,7 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('read_employee')")
+	@PreAuthorize("hasAuthority('employee.read')")
 	@GetMapping("/{id}")
 	public ResponseEntity<Object> getEmployeeById(@PathVariable Long id) {
 		EmployeeDTO responseDto = employeeService.getEmployeeById(id);
@@ -41,7 +41,7 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('create_employee')")
+	@PreAuthorize("hasAuthority('employee.create')")
 	@PostMapping
 	public ResponseEntity<Object> createEmployee(@Valid @RequestBody EmployeeDTO employee) {
 		EmployeeDTO responseDto = employeeService.createEmployee(employee);
@@ -49,7 +49,7 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('update_employee')")
+	@PreAuthorize("hasAuthority('employee.update')")
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employee) {
 		EmployeeDTO responseDto = employeeService.updateEmployee(id, employee);
@@ -57,7 +57,7 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('delete_employee')")
+	@PreAuthorize("hasAuthority('employee.delete')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> deleteEmployee(@PathVariable Long id) {
 		employeeService.deleteEmployee(id);
@@ -66,7 +66,7 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('read_employee')")
+	@PreAuthorize("hasAuthority('employee.read')")
 	@GetMapping("/department/{departmentId}")
 	public ResponseEntity<Object> getEmployeesByDepartment(@PathVariable Long departmentId) {
 		List<EmployeeDTO> responseDto = employeeService.getEmployeesByDepartment(departmentId);
@@ -74,7 +74,7 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('read_employee')")
+	@PreAuthorize("hasAuthority('employee.read')")
 	@GetMapping("/position/{positionId}")
 	public ResponseEntity<Object> getEmployeesByPosition(@PathVariable Long positionId) {
 		List<EmployeeDTO> responseDto = employeeService.getEmployeesByPosition(positionId);
