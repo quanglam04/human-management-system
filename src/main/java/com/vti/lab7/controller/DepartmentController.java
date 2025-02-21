@@ -22,7 +22,7 @@ import com.vti.lab7.service.impl.DepartmentService;
 
 @RestController
 @RequestMapping("api/v1/departments")
-public class DepartmentController {
+public class DepartmentController{
 
 	@Autowired
 	private DepartmentService departmentService;

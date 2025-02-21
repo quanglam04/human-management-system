@@ -54,6 +54,14 @@ public class RoleServiceImpl implements RoleService {
 	public void deleteById(long id) {
 		roleRepository.deleteById(id);
 	}
+	
+	public Role createRole(Role role) {
+		return roleRepository.save(role);
+	}
+	
+	public Role updateRole(Role role) {
+		return roleRepository.save(role);
+	}
 
 	@Override
 	public List<Permission> findPermissionsByRoleId(Long roleId) {
