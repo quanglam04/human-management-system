@@ -55,8 +55,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 		String sortBy = order != null ? order.getProperty() : null;
 		String sortType = order != null ? order.getDirection().name() : null;
 
-		PagingMeta pagingMeta = new PagingMeta(page.getTotalElements(), page.getTotalPages(),
-				pageable.getPageNumber() + 1, pageable.getPageSize(), sortBy, sortType);
+
+
+		PagingMeta pagingMeta = new PagingMeta(page.getTotalElements(), page.getTotalPages(), pageable.getPageNumber(),
+				pageable.getPageSize(), sortBy, sortType);
+
 
 		List<EmployeeDTO> items = page.getContent().stream().map(EmployeeMapper::convertToDTO).toList();
 
@@ -78,6 +81,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 		User user = userRepository.findById(requestDTO.getUserId())
 				.orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + requestDTO.getUserId()));
 
+
+		if (user.getEmployee() != null) {
+			throw new IllegalStateException(
+					"User with ID " + requestDTO.getUserId() + " is already assigned to an employee.");
+		}
+
+
 		Position position = positionRepository.findById(requestDTO.getPositionId()).orElseThrow(
 				() -> new EntityNotFoundException("Position not found with ID: " + requestDTO.getPositionId()));
 
@@ -85,6 +95,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 				() -> new EntityNotFoundException("Department not found with ID: " + requestDTO.getDepartmentId()));
 
 		Employee newEmployee = EmployeeMapper.convertToEntity(requestDTO);
+
+		newEmployee.setEmployeeId(null);
 		newEmployee.setUser(user);
 		newEmployee.setPosition(position);
 		newEmployee.setDepartment(department);
@@ -96,11 +108,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	@Override
 	public EmployeeDTO updateEmployee(Long id, EmployeeDTO requestDTO) {
+
 		Employee updatedEmployee = getEntity(id);
 
 		employeeRepository.save(updatedEmployee);
 
 		return EmployeeMapper.convertToDTO(employeeRepository.save(updatedEmployee));
+
 	}
 
 	@Override
@@ -113,12 +127,17 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	@Override
 	public List<EmployeeDTO> getEmployeesByDepartment(Long departmentId) {
+
 		return employeeRepository.findByDepartmentDepartmentId(departmentId).stream().map(EmployeeMapper::convertToDTO).toList();
 	}
 
 	@Override
 	public List<EmployeeDTO> getEmployeesByPosition(Long positionId) {
+
 		return employeeRepository.findByPositionPositionId(positionId).stream().map(EmployeeMapper::convertToDTO).toList();
 	}
 
+
+
 }
+
