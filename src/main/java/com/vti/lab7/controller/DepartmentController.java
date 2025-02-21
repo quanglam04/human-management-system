@@ -33,7 +33,6 @@ public class DepartmentController {
 		Optional<Department> departmentOptional = departmentService.findDepartment(id);
 		return departmentOptional.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
-
 	@PostMapping()
 	@PreAuthorize("hasAuthority('create_new_department')")
 	public ResponseEntity<Department> createDepartment(@RequestBody Department department) {

@@ -36,6 +36,7 @@ public class RolePermissionController {
 
 	@GetMapping("/{roleId}/{permissionId}")
 	@PreAuthorize("hasAuthority('get_role_permission_by_perrmission_id')")
+	
 	public ResponseEntity<RolePermission> findRolePermissions(@PathVariable Long roleId,
 			@PathVariable Long permissionId) {
 
