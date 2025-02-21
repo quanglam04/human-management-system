@@ -1,5 +1,6 @@
 package com.vti.lab7.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -32,7 +33,7 @@ public class User {
 	@JoinColumn(name = "role_id", nullable = false)
 	private Role role;
 
-	@OneToOne(mappedBy = "user")
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 	private Employee employee;
 
 }
