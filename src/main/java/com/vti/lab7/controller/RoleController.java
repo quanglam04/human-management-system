@@ -19,9 +19,8 @@ import com.vti.lab7.dto.mapper.RoleMapperDTO;
 import com.vti.lab7.dto.request.RoleRequestDTO;
 import com.vti.lab7.dto.response.RestData;
 import com.vti.lab7.exception.custom.ConflictException;
-import com.vti.lab7.exception.custom.IdInvalidException;
+import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Role;
-import com.vti.lab7.repository.RoleRepository;
 import com.vti.lab7.model.Permission;
 import com.vti.lab7.service.impl.RoleServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -47,10 +46,10 @@ public class RoleController {
 
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('role.readRoleByID')")
-	public ResponseEntity<RestData<?>> getRoleById(@PathVariable long id) throws IdInvalidException, MethodArgumentTypeMismatchException{
+	public ResponseEntity<RestData<?>> getRoleById(@PathVariable long id) throws MethodArgumentTypeMismatchException{
 		Role role = roleServiceImpl.findById(id);
 		if (role == null)
-			throw new IdInvalidException("ID invalid");
+			throw new NotFoundException("ID invalid");
 		RestData<RoleDTO> roleResponse = new RestData<>();
 		roleResponse.setData(RoleMapperDTO.convertToRoleDTO(role));
 		roleResponse.setError(null);
@@ -61,11 +60,11 @@ public class RoleController {
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('role.deleteRoleByID')")
-	public ResponseEntity<String> deleteRole(@PathVariable long id) throws MethodArgumentTypeMismatchException,IdInvalidException{
+	public ResponseEntity<String> deleteRole(@PathVariable long id) throws MethodArgumentTypeMismatchException{
 
 		Role role = roleServiceImpl.findById(id);
 		if (role == null)
-			throw new IdInvalidException("Id invalid");
+			throw new NotFoundException("Id invalid");
 		roleServiceImpl.deleteById(id);
 		return ResponseEntity.ok("Delete role success");
 	}
@@ -95,11 +94,11 @@ public class RoleController {
 	
 	@PutMapping("/{id}")
 	@PreAuthorize("hasAuthority('role.updateRoleByID')")
-	public ResponseEntity<RestData<RoleDTO>> updateRole(@PathVariable long id, @RequestBody RoleRequestDTO roleRequestDTO) throws IdInvalidException,ConflictException {
+	public ResponseEntity<RestData<RoleDTO>> updateRole(@PathVariable long id, @RequestBody RoleRequestDTO roleRequestDTO) throws ConflictException {
 		Role role = roleServiceImpl.findById(id);
 		RestData<RoleDTO> restData = new RestData<>();
 		if(role == null)
-			throw new IdInvalidException("ID invalid");
+			throw new NotFoundException("ID invalid");
 		
 		List<String> roleNames = roleServiceImpl.findAll().stream().map(x -> x.getRoleName()).toList();
 		for(String roleName : roleNames )
