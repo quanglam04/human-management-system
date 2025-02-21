@@ -6,7 +6,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-
+import com.vti.lab7.model.Permission;
 import com.vti.lab7.model.Role;
 import com.vti.lab7.repository.RoleRepository;
 import com.vti.lab7.service.RoleService;
@@ -56,12 +56,12 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
-	public List<Role> findRolesByPermissionId(Long permissionId) {
-		List<Role> listRoles = roleRepository.findRolesByPermissionId(permissionId);
-		if (listRoles.isEmpty()) {
-			throw new EntityNotFoundException(getMessage("error.roles.notfound"));
+	public List<Permission> findPermissionsByRoleId(Long roleId) {
+		List<Permission> permissions = roleRepository.findPermissionsByRoleId(roleId);
+		if (permissions.isEmpty()) {
+			throw new EntityNotFoundException(getMessage("error.permissions.notfound"));
 		}
-		return listRoles;
+		return permissions;
 	}
 
 }
