@@ -3,6 +3,7 @@ package com.vti.lab7.controller;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,7 @@ import com.vti.lab7.exception.custom.IdInvalidException;
 import com.vti.lab7.model.Position;
 import com.vti.lab7.service.impl.PositionServiceImpl;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class PositionController {
 	private final PositionServiceImpl positionServiceImpl;
 	
 	@GetMapping()
+	@PreAuthorize("hasAuthority('position_read_all')")
 	public ResponseEntity<RestData<List<PositionDTO>>> getAllPosition(){
 		List<Position> positions = positionServiceImpl.findAll();
 		List<PositionDTO> positionsDTO = positions.stream().map(PositionMapperDTO::convertPositionDTO).toList();
@@ -43,6 +46,7 @@ public class PositionController {
 	}
 	
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAuthority('position_read_by_id')")
 	public ResponseEntity<RestData<PositionDTO>> getPositionByID(@PathVariable long id) throws IdInvalidException, MethodArgumentTypeMismatchException{
 		Position position = positionServiceImpl.findById(id);
 		if(position == null)
@@ -57,6 +61,7 @@ public class PositionController {
 	}
 	
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAuthority('position_delete_by_id')")
     public ResponseEntity<RestData<Void>> deletePosition(@PathVariable Long id) throws IdInvalidException, MethodArgumentTypeMismatchException {
 		Position position = positionServiceImpl.findById(id);
 		if(position == null)
@@ -71,8 +76,8 @@ public class PositionController {
     }
 	
 	@PostMapping
-    public ResponseEntity<RestData<PositionDTO>> createPosition(@RequestBody PositionRequestDTO request) {	
-		System.out.println(request.getPositionName());
+	@PreAuthorize("hasAuthority('position_create')")
+    public ResponseEntity<RestData<PositionDTO>> createPosition(@Valid @RequestBody PositionRequestDTO request) {	
         Position savedPosition = positionServiceImpl.createPosition(request.getPositionName());
         PositionDTO savedPositionDTO = PositionMapperDTO.convertPositionDTO(savedPosition);
         RestData<PositionDTO> restData = new RestData<>();
@@ -84,7 +89,8 @@ public class PositionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RestData<PositionDTO>> updatePosition(@PathVariable Long id, @RequestBody PositionRequestDTO request) throws IdInvalidException,MethodArgumentTypeMismatchException {
+    @PreAuthorize("hasAuthority('position_update_by_id')")
+    public ResponseEntity<RestData<PositionDTO>> updatePosition(@PathVariable Long id,@Valid @RequestBody PositionRequestDTO request) throws IdInvalidException,MethodArgumentTypeMismatchException {
     	Position position = positionServiceImpl.findById(id);
 		if(position == null)
 			throw new IdInvalidException("Id invalid");

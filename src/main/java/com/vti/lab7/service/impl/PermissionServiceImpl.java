@@ -48,17 +48,23 @@ public class PermissionServiceImpl implements PermissionService {
             "delete_departments", 
             "get_all_role_permissions",
             "delete_any_user",
-            "employee.read", 
-            "employee.create", 
-            "employee.update", 
-            "employee.delete", 
-            "employee.department.read",
-            "employee.position.read",
-            "role.readAll",
-            "role.readRoleByID",
-            "role.create",
-            "role.updateRoleByID",
-            "role.deleteRoleByID"
+            "employee_read", 
+            "employee_create", 
+            "employee_update", 
+            "employee_delete", 
+            "employee_department_read",
+            "employee_position_read",
+            "role_read_all",
+            "role_read_role_by_id",
+            "role_create",
+            "role_update_role_by_id",
+            "role_delete_role_by_id",
+            
+            "position_read_all",
+            "position_read_by_id",
+            "position_create",
+            "position_update_by_id",
+            "position_delete_by_id"
             );
             
     private List<String> descriptions = List.of(
@@ -89,7 +95,12 @@ public class PermissionServiceImpl implements PermissionService {
             "Lấy thông tin chi tiết của 1 vai trò theo ID",
             "Tạo một vai trò mới",
             "Cập nhật thông tin vai trò theo ID",
-            "Xóa một vai trò theo ID"
+            "Xóa một vai trò theo ID",
+            "Lấy danh sách tất cả các vị trí",
+            "Lấy thông tin của một vị trí theo ID",
+            "Tạo một vị trí mới",
+            "Cập nhật thông tin một vị trí theo ID",
+            "Xóa một vị trí theo ID"
             );
 
 
