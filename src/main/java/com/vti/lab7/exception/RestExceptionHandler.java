@@ -3,9 +3,7 @@ package com.vti.lab7.exception;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,16 +15,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
 import com.vti.lab7.dto.response.ErrorResponse;
-
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.FieldError;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
@@ -218,6 +212,19 @@ public class RestExceptionHandler {
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
 
+	
+	@ExceptionHandler(IdInvalidException.class)
+	public ResponseEntity<Object> handleIdNotExist(IdInvalidException exception) {
+		String message = "ID not exist in Database";
+		String detailMessage = exception.getLocalizedMessage();
+		int code = 404;
+		String moreInformation = "http://localhost:8080/api/v1/exception/404";
+
+		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
+		log.error(detailMessage, exception);
+		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+	}
+
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
 		String message = getMessage("HttpMessageNotReadableException.message");
@@ -228,5 +235,6 @@ public class RestExceptionHandler {
 		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
 		log.error(detailMessage, exception);
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
 	}
 }
