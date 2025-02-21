@@ -24,12 +24,15 @@ public class EmployeeDTO {
 	@Size(max = 50, message = "Last name must not exceed 50 characters")
 	private String lastName;
 
-	@NotNull(message = "Date of birth is required")
+
+
+	@NotBlank(message = "Phone number must be 10 digits")
 	@Past(message = "Date of birth must be in the past")
 	private Date dateOfBirth;
 
 	@NotBlank(message = "Phone number must be 10 digits")
 	@Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
+
 	private String phoneNumber;
 
 	@Size(max = 255, message = "Address must not exceed 255 characters")
@@ -37,12 +40,14 @@ public class EmployeeDTO {
 
 	@NotNull(message = "Hire date is required")
 	@PastOrPresent(message = "Hire date cannot be in the future")
+
 	private Date hireDate;
 
 	@Positive(message = "Salary must be positive")
 	private BigDecimal salary;
 
 	@NotBlank(message = "Status is required")
+
 	private String status;
 
 	@NotNull(message = "User ID is required")
@@ -61,4 +66,5 @@ public class EmployeeDTO {
 		}
 		return true;
 	}
+
 }

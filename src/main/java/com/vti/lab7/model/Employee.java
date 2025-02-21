@@ -2,7 +2,6 @@ package com.vti.lab7.model;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

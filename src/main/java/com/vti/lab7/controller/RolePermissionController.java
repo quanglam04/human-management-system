@@ -36,7 +36,7 @@ public class RolePermissionController {
 
 	@GetMapping("/{roleId}/{permissionId}")
 	@PreAuthorize("hasAuthority('get_role_permission_by_perrmission_id')")
-	
+
 	public ResponseEntity<RolePermission> findRolePermissions(@PathVariable Long roleId,
 			@PathVariable Long permissionId) {
 
@@ -64,13 +64,6 @@ public class RolePermissionController {
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Role-Permission not found");
 		}
-	}
-	
-	@GetMapping("/role/{roleId}/permissions")
-	@PreAuthorize("hasAuthority('get_list_permissions_of_role')")
-	public ResponseEntity<List<RolePermission>> getPermissions(@PathVariable Long roleId) {
-		List<RolePermission> permissions = rolePermissionServiceImpl.getPermissionsByRoleId(roleId);
-	    return ResponseEntity.ok(permissions);
 	}
 
 }

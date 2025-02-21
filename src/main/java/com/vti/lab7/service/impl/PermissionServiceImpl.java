@@ -2,12 +2,17 @@ package com.vti.lab7.service.impl;
 
 import java.util.List;
 
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.vti.lab7.dto.PermissionDTO;
 import com.vti.lab7.dto.mapper.PermissionMapper;
 import com.vti.lab7.model.Permission;
+import com.vti.lab7.model.Role;
 import com.vti.lab7.repository.PermissionRepository;
 import com.vti.lab7.service.PermissionService;
 
@@ -17,7 +22,15 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PermissionServiceImpl implements PermissionService {
+
 	
+	
+	@Autowired
+	private MessageSource messageSource;
+
+	private String getMessage(String key) {
+		return messageSource.getMessage(key, null, "Default message", LocaleContextHolder.getLocale());
+	}
 	private List<String> permissionNames = List.of(
             "get_all_users", 
             "get_department_users", 
@@ -104,6 +117,15 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 
 	@Override
+
+	public List<Role> findRolesByPermissionId(Long permissionId) {
+			List<Role> permissions = permissionRepository.findRolesByPermissionId(permissionId);
+			if (permissions.isEmpty()) {
+				throw new EntityNotFoundException(getMessage("error.permissions.notfound"));
+			}
+			return permissions;
+	}
+
 	public List<PermissionDTO> getAllPermissions() {
 		return permissionRepository.findAll().stream().map(PermissionMapper::mapToDTO).toList();
 	}
