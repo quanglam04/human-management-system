@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -22,14 +23,20 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "positions")
 public class Position {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long positionId;
-	private String positionName;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  
+	@Column(name = "position_id")
+    private Long positionId;
+
+    @Column(name = "position_name", nullable = false)
+    private String positionName;
+    
+	public Position(String positionName) {
+		this.positionName = positionName; 
+	}
 
 	@OneToMany(mappedBy = "position", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
 	@JsonIgnore

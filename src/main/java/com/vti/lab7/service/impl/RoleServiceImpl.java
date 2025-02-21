@@ -1,5 +1,8 @@
 package com.vti.lab7.service.impl;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.vti.lab7.model.Role;
@@ -26,6 +29,21 @@ public class RoleServiceImpl implements RoleService {
 			roleRepository.save(role3);
 		}
 
+	}
+	
+	public List<Role> findAll() {
+		return roleRepository.findAll();
+	}
+	
+	public Role findById(long id) {
+		Optional<Role> roleOptional = roleRepository.findById(id);
+		if(roleOptional.isPresent())
+			return roleOptional.get();
+		return null;
+	}
+	
+	public void deleteById(long id) {
+		roleRepository.deleteById(id);
 	}
 
 }
