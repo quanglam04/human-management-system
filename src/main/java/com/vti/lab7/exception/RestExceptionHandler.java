@@ -19,6 +19,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import com.vti.lab7.dto.response.ErrorResponse;
+import com.vti.lab7.exception.custom.IdInvalidException;
+
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.FieldError;
 import jakarta.validation.ConstraintViolation;
@@ -211,6 +213,19 @@ public class RestExceptionHandler {
 		log.error(detailMessage, exception);
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
+
+	@ExceptionHandler(IdInvalidException.class)
+	public ResponseEntity<Object> handleIdNotExist(IdInvalidException exception) {
+		String message = "ID not exist in Database";
+		String detailMessage = exception.getLocalizedMessage();
+		int code = 404;
+		String moreInformation = "http://localhost:8080/api/v1/exception/404";
+
+		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
+		log.error(detailMessage, exception);
+		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+	}
+
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
 		String message = getMessage("HttpMessageNotReadableException.message");
@@ -221,5 +236,6 @@ public class RestExceptionHandler {
 		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
 		log.error(detailMessage, exception);
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
 	}
 }
