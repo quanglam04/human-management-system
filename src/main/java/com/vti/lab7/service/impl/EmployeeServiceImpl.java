@@ -2,10 +2,14 @@ package com.vti.lab7.service.impl;
 
 import java.util.List;
 
+import com.vti.lab7.exception.custom.ForbiddenException;
+import com.vti.lab7.exception.custom.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vti.lab7.dto.EmployeeDTO;
@@ -45,15 +49,31 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public PaginationResponseDto<EmployeeDTO> getAllEmployees(String firstName, String lastName, String phoneNumber,
 			String status, Pageable pageable) {
 
+        //Lấy thông tin người dùng hiện tại
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String currentUsername = authentication.getName();
+		Employee currentEmployee = employeeRepository.findByUserUsername(currentUsername).orElseThrow(() -> new NotFoundException(
+                "...", currentUsername));
+
+        //Kiểm tra nếu là MANAGER
+        Long departmentId = null;
+		if("MANAGER".equals(currentEmployee.getUser().getRole().getRoleName())){
+              departmentId = currentEmployee.getDepartment().getDepartmentId();
+		}
+
 		Specification<Employee> spec = Specification.where(EmployeeSpecification.hasFirstName(firstName))
 				.and(EmployeeSpecification.hasLastName(lastName)).and(EmployeeSpecification.hasPhoneNumber(phoneNumber))
-				.and(EmployeeSpecification.hasStatus(status));
+				.and(EmployeeSpecification.hasStatus(status).and(EmployeeSpecification.belongsToDepartment(departmentId)));
 
 		Page<Employee> page = employeeRepository.findAll(spec, pageable);
 
 		Sort.Order order = pageable.getSort().stream().findFirst().orElse(null);
-		String sortBy = order != null ? order.getProperty() : null;
-		String sortType = order != null ? order.getDirection().name() : null;
+		String sortBy= null;
+		String sortType = null;
+		if(order != null){
+			sortBy = order.getProperty();
+			sortType = order.getDirection().name();
+		}
 
 		PagingMeta pagingMeta = new PagingMeta(page.getTotalElements(), page.getTotalPages(), pageable.getPageNumber(),
 				pageable.getPageSize(), sortBy, sortType);
@@ -69,12 +89,55 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	@Override
 	public EmployeeDTO getEmployeeById(Long id) {
-		Employee employee = getEntity(id);
-		return EmployeeMapper.convertToDTO(employee);
+        //Lấy thông tin người dùng hiện tại
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User currentUser = userRepository.findByUsername(currentUsername).orElseThrow(() -> new NotFoundException(
+                "...", currentUsername));
+
+        String roleName= currentUser.getRole().getRoleName();
+
+        if ("ADMIN".equals(roleName)) {
+            return EmployeeMapper.convertToDTO(getEntity(id));
+        }
+
+        if ("EMPLOYEE".equals(roleName)) {
+            if (!id.equals(currentUser.getEmployee().getEmployeeId())) {
+                throw new ForbiddenException("Bạn chỉ được phép xem thông tin của bản thân.");
+            }
+            return EmployeeMapper.convertToDTO(currentUser.getEmployee());
+        }
+
+        if ("MANAGER".equals(roleName)) {
+            Long managerDepartmentId = currentUser.getEmployee().getDepartment().getDepartmentId();
+
+            Employee employee = employeeRepository.findByEmployeeIdAndDepartmentDepartmentId(id, managerDepartmentId)
+                    .orElseThrow(() -> new ForbiddenException("Bạn không có quyền truy cập thông tin nhân viên này."));
+
+            return EmployeeMapper.convertToDTO(employee);
+        }
+
+        throw new ForbiddenException("Vai trò người dùng không hợp lệ.");
 	}
 
 	@Override
 	public EmployeeDTO createEmployee(EmployeeDTO requestDTO) {
+        // Lấy thông tin người dùng hiện tại
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng", currentUsername));
+
+        String roleName = currentUser.getRole().getRoleName();
+        Long requestedDepartmentId = requestDTO.getDepartmentId();
+
+        // MANAGER chỉ được tạo nhân viên trong phòng ban của mình
+        if ("MANAGER".equals(roleName)) {
+            Long managerDepartmentId = currentUser.getEmployee().getDepartment().getDepartmentId();
+            if (!managerDepartmentId.equals(requestedDepartmentId)) {
+                throw new ForbiddenException("Bạn chỉ được phép tạo nhân viên trong phòng ban của mình.");
+            }
+        }
+
 		User user = userRepository.findById(requestDTO.getUserId())
 				.orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + requestDTO.getUserId()));
 
@@ -102,7 +165,31 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	@Override
 	public EmployeeDTO updateEmployee(Long id, EmployeeDTO requestDTO) {
-		Employee existingEmployee = getEntity(id);
+        // Lấy thông tin người dùng hiện tại
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng", currentUsername));
+
+        String roleName = currentUser.getRole().getRoleName();
+
+        Employee existingEmployee = getEntity(id);
+
+        if ("ADMIN".equals(roleName)) {
+            // ADMIN có toàn quyền, không cần kiểm tra thêm
+        } else if ("MANAGER".equals(roleName)) {
+            // MANAGER chỉ được cập nhật nhân viên trong cùng phòng ban
+            long managerDepartmentId = currentUser.getEmployee().getDepartment().getDepartmentId();
+            if (existingEmployee.getDepartment().getDepartmentId() != managerDepartmentId) {
+                throw new ForbiddenException("Bạn chỉ được phép cập nhật nhân viên trong phòng ban của mình.");
+            }
+        } else if ("EMPLOYEE".equals(roleName)) {
+            // EMPLOYEE chỉ được cập nhật thông tin của chính mình
+            if (existingEmployee.getUser().getUserId() != currentUser.getUserId()) {
+                throw new ForbiddenException("Bạn chỉ được phép cập nhật thông tin của bản thân.");
+            }
+        } else {
+            throw new ForbiddenException("Vai trò người dùng không hợp lệ.");
+        }
 
 		if (requestDTO.getUserId() != null) {
 			if (!requestDTO.getUserId().equals(existingEmployee.getUser().getUserId())) {
