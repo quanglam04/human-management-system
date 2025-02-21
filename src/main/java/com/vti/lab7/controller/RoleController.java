@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +21,12 @@ import org.springframework.web.service.annotation.DeleteExchange;
 
 import com.vti.lab7.dto.RoleDTO;
 import com.vti.lab7.dto.mapper.RoleMapperDTO;
+import com.vti.lab7.dto.request.RoleRequestDTO;
 import com.vti.lab7.dto.response.RestData;
+import com.vti.lab7.exception.custom.ConflictException;
 import com.vti.lab7.exception.custom.IdInvalidException;
 import com.vti.lab7.model.Role;
+import com.vti.lab7.repository.RoleRepository;
 import com.vti.lab7.service.impl.RoleServiceImpl;
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +40,7 @@ public class RoleController {
 	
 	
 	@GetMapping()
+	@PreAuthorize("hasAuthority('role.readAll')")
 	public ResponseEntity<RestData<List<RoleDTO>>> getAllRole() {
 		List<Role> roles = roleServiceImpl.findAll();
 		List<RoleDTO> rolesDTO = roles.stream().map(RoleMapperDTO::convertToRoleDTO).collect(Collectors.toList());
@@ -48,6 +54,7 @@ public class RoleController {
 	}
 	
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAuthority('role.readRoleByID')")
 	public ResponseEntity<RestData<?>> getRoleById(@PathVariable long id) throws IdInvalidException, MethodArgumentTypeMismatchException{
 		Role role = roleServiceImpl.findById(id);
 		if(role == null)
@@ -61,6 +68,7 @@ public class RoleController {
 	}
 	
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAuthority('role.deleteRoleByID')")
 	public ResponseEntity<String> deleteRole(@PathVariable long id) throws MethodArgumentTypeMismatchException,IdInvalidException{
 		Role role = roleServiceImpl.findById(id);
 		if(role == null)
@@ -68,14 +76,51 @@ public class RoleController {
 		roleServiceImpl.deleteById(id);
 		return ResponseEntity.ok("Delete role success");
 	}
-//	@PostMapping()
-//	public ResponseEntity<T> createRole(@RequestBody Role role){
-//		
-//	}
-//	
-//	@PutMapping("/{id")
-//	public ResponseEntity<T> updateRole(@PathVariable String id){
-//		
-//	}
+	@PostMapping()
+	@PreAuthorize("hasAuthority('role.create')")
+	public ResponseEntity<RestData<RoleDTO>> createRole(@RequestBody RoleRequestDTO roleRequestDTO) throws ConflictException{
+		RestData<RoleDTO> restData = new RestData<>();
+		Role role = new Role();
+		String roleNameRequest = roleRequestDTO.getRoleName();
+		List<String> roleNames = roleServiceImpl.findAll().stream().map(x -> x.getRoleName()).toList();
+		for(String roleName : roleNames )
+			if(roleName.toLowerCase().trim().equals(roleNameRequest.toLowerCase().trim()))
+				throw new ConflictException("error.role.name.exist",roleName );
+		role.setDescription(roleRequestDTO.getDescription());
+		role.setRoleName(roleRequestDTO.getRoleName());
+		
+		RoleDTO roleDTO = RoleMapperDTO.convertToRoleDTO(roleServiceImpl.createRole(role))  ;
+		restData.setData(roleDTO);
+		restData.setError(null);
+		restData.setMessage("create role success");
+		restData.setStatus(HttpStatus.CREATED.value());
+		
+		return ResponseEntity.status(HttpStatus.CREATED).body(restData);
+		
+	}
+	
+	@PutMapping("/{id}")
+	@PreAuthorize("hasAuthority('role.updateRoleByID')")
+	public ResponseEntity<RestData<RoleDTO>> updateRole(@PathVariable long id, @RequestBody RoleRequestDTO roleRequestDTO) throws IdInvalidException,ConflictException {
+		Role role = roleServiceImpl.findById(id);
+		RestData<RoleDTO> restData = new RestData<>();
+		if(role == null)
+			throw new IdInvalidException("ID invalid");
+		
+		List<String> roleNames = roleServiceImpl.findAll().stream().map(x -> x.getRoleName()).toList();
+		for(String roleName : roleNames )
+			if(roleName.toLowerCase().equals(roleRequestDTO.getRoleName().toLowerCase()))
+				throw new ConflictException("error.role.name.exist",roleName );
+		role.setDescription(roleRequestDTO.getDescription().trim());
+		role.setRoleName(roleRequestDTO.getRoleName().trim());
+		roleServiceImpl.updateRole(role);
+		restData.setData(RoleMapperDTO.convertToRoleDTO(role));
+		restData.setStatus(HttpStatus.OK.value());
+		restData.setError(null);
+		restData.setMessage("update role success");
+		
+		return ResponseEntity.ok(restData);
+			
+	}
 	
 }

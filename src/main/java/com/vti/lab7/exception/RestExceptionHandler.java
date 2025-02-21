@@ -1,11 +1,10 @@
 package com.vti.lab7.exception;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,17 +16,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
 import com.vti.lab7.dto.response.ErrorResponse;
+import com.vti.lab7.exception.custom.ConflictException;
 import com.vti.lab7.exception.custom.IdInvalidException;
 
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.FieldError;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
@@ -43,6 +40,10 @@ public class RestExceptionHandler {
 
 	private String getMessage(String key) {
 		return messageSource.getMessage(key, null, "Default message", LocaleContextHolder.getLocale());
+	}
+	
+	private String getMessage(String key, Object[] params) {
+		return messageSource.getMessage(key, params, "Default message", LocaleContextHolder.getLocale());
 	}
 
 	// Default exception
@@ -243,5 +244,16 @@ public class RestExceptionHandler {
 		log.error(detailMessage, exception);
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 
+	}
+	
+	@ExceptionHandler(ConflictException.class)
+	public ResponseEntity<Object> handleConflictDataException(ConflictException exception){
+		String message = getMessage(exception.getMessage(),exception.getParams());
+		String detailMessage = exception.getLocalizedMessage();
+		int code = 409;
+		String moreInformation = "http://localhost:8080/api/v1/exception/409";
+		ErrorResponse response = new ErrorResponse(message,detailMessage,null,code,moreInformation);
+		log.error(detailMessage,exception);
+		return new ResponseEntity<>(response,HttpStatus.CONFLICT);
 	}
 }
