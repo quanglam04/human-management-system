@@ -1,5 +1,4 @@
 package com.vti.lab7.controller;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +32,6 @@ public class DepartmentController {
 		Optional<Department> departmentOptional = departmentService.findDepartment(id);
 		return departmentOptional.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
-
 	@PostMapping()
 	@PreAuthorize("hasAuthority('create_new_department')")
 	public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
@@ -68,7 +66,6 @@ public class DepartmentController {
 
 		return ResponseEntity.ok(existingDepartment);
 	}
-
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('delete_department_by_id')")
 	public ResponseEntity<Object> deleteDepartment(@PathVariable Long id) {
@@ -77,5 +74,8 @@ public class DepartmentController {
 		return ResponseEntity.ok().body(restData);
 
 	}
+	
+	
 
+	
 }

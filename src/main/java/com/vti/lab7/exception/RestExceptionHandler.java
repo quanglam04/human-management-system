@@ -214,6 +214,7 @@ public class RestExceptionHandler {
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
 
+	
 	@ExceptionHandler(IdInvalidException.class)
 	public ResponseEntity<Object> handleIdNotExist(IdInvalidException exception) {
 		String message = "ID not exist in Database";

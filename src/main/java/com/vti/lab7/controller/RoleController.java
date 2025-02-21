@@ -31,7 +31,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/roles")
 public class RoleController {
 	private final RoleServiceImpl roleServiceImpl;
-
+	
+	
+	
 	@GetMapping()
 	public ResponseEntity<RestData<List<RoleDTO>>> getAllRole() {
 		List<Role> roles = roleServiceImpl.findAll();
@@ -42,14 +44,13 @@ public class RoleController {
 		restData.setMessage("get all role success");
 		restData.setStatus(200);
 		return ResponseEntity.ok(restData);
-
+		
 	}
-
+	
 	@GetMapping("/{id}")
-	public ResponseEntity<RestData<?>> getRoleById(@PathVariable long id)
-			throws IdInvalidException, MethodArgumentTypeMismatchException {
+	public ResponseEntity<RestData<?>> getRoleById(@PathVariable long id) throws IdInvalidException, MethodArgumentTypeMismatchException{
 		Role role = roleServiceImpl.findById(id);
-		if (role == null)
+		if(role == null)
 			throw new IdInvalidException("ID invalid");
 		RestData<RoleDTO> roleResponse = new RestData<>();
 		roleResponse.setData(RoleMapperDTO.convertToRoleDTO(role));
@@ -58,12 +59,11 @@ public class RoleController {
 		roleResponse.setMessage("Get role by id Success");
 		return ResponseEntity.ok(roleResponse);
 	}
-
+	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteRole(@PathVariable long id)
-			throws MethodArgumentTypeMismatchException, IdInvalidException {
+	public ResponseEntity<String> deleteRole(@PathVariable long id) throws MethodArgumentTypeMismatchException,IdInvalidException{
 		Role role = roleServiceImpl.findById(id);
-		if (role == null)
+		if(role == null)
 			throw new IdInvalidException("Id invalid");
 		roleServiceImpl.deleteById(id);
 		return ResponseEntity.ok("Delete role success");
@@ -77,5 +77,5 @@ public class RoleController {
 //	public ResponseEntity<T> updateRole(@PathVariable String id){
 //		
 //	}
-
+	
 }

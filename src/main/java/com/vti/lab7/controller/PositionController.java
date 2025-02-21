@@ -31,9 +31,9 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/positions")
 public class PositionController {
 	private final PositionServiceImpl positionServiceImpl;
-
+	
 	@GetMapping()
-	public ResponseEntity<RestData<List<PositionDTO>>> getAllPosition() {
+	public ResponseEntity<RestData<List<PositionDTO>>> getAllPosition(){
 		List<Position> positions = positionServiceImpl.findAll();
 		List<PositionDTO> positionsDTO = positions.stream().map(PositionMapperDTO::convertPositionDTO).toList();
 		RestData<List<PositionDTO>> restData = new RestData<>();
@@ -42,67 +42,68 @@ public class PositionController {
 		restData.setMessage("get position success");
 		restData.setStatus(200);
 		return ResponseEntity.ok(restData);
-
+		
 	}
-
+	
 	@GetMapping("/{id}")
-	public ResponseEntity<RestData<PositionDTO>> getPositionByID(@PathVariable long id)
-			throws IdInvalidException, MethodArgumentTypeMismatchException {
+	public ResponseEntity<RestData<PositionDTO>> getPositionByID(@PathVariable long id) throws IdInvalidException, MethodArgumentTypeMismatchException{
 		Position position = positionServiceImpl.findById(id);
-		if (position == null)
+		if(position == null)
 			throw new IdInvalidException("Id invalid");
 		RestData<PositionDTO> restData = new RestData<>();
 		restData.setData(PositionMapperDTO.convertPositionDTO(position));
 		restData.setError("null");
-		restData.setMessage("get position by id = " + id + " success");
+		restData.setMessage("get position by id = "+id+" success");
 		restData.setStatus(200);
 		return ResponseEntity.ok(restData);
-
+		
 	}
-
+	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<RestData<Void>> deletePosition(@PathVariable Long id)
-			throws IdInvalidException, MethodArgumentTypeMismatchException {
+    public ResponseEntity<RestData<Void>> deletePosition(@PathVariable Long id) throws IdInvalidException, MethodArgumentTypeMismatchException {
 		Position position = positionServiceImpl.findById(id);
-		if (position == null)
+		if(position == null)
 			throw new IdInvalidException("Id invalid");
 		positionServiceImpl.deleteById(id);
-		RestData<Void> restData = new RestData<>();
-		restData.setData(null);
-		restData.setError(null);
-		restData.setMessage("delete position success");
-		restData.setStatus(200);
-		return ResponseEntity.ok(restData);
-	}
-
+        RestData<Void> restData = new RestData<>();
+        restData.setData(null);
+        restData.setError(null);
+        restData.setMessage("delete position success");
+        restData.setStatus(200);
+        return ResponseEntity.ok(restData);
+    }
+	
 	@PostMapping
-	public ResponseEntity<RestData<PositionDTO>> createPosition(@RequestBody PositionRequestDTO request) {
+    public ResponseEntity<RestData<PositionDTO>> createPosition(@RequestBody PositionRequestDTO request) {	
 		System.out.println(request.getPositionName());
-		Position savedPosition = positionServiceImpl.createPosition(request.getPositionName());
-		PositionDTO savedPositionDTO = PositionMapperDTO.convertPositionDTO(savedPosition);
-		RestData<PositionDTO> restData = new RestData<>();
-		restData.setData(savedPositionDTO);
-		restData.setError(null);
-		restData.setMessage("create position success");
-		restData.setStatus(201);
-		return ResponseEntity.status(HttpStatus.CREATED).body(restData);
-	}
+        Position savedPosition = positionServiceImpl.createPosition(request.getPositionName());
+        PositionDTO savedPositionDTO = PositionMapperDTO.convertPositionDTO(savedPosition);
+        RestData<PositionDTO> restData = new RestData<>();
+        restData.setData(savedPositionDTO);
+        restData.setError(null);
+        restData.setMessage("create position success");
+        restData.setStatus(201);
+        return ResponseEntity.status(HttpStatus.CREATED).body(restData);
+    }
 
-	@PutMapping("/{id}")
-	public ResponseEntity<RestData<PositionDTO>> updatePosition(@PathVariable Long id,
-			@RequestBody PositionRequestDTO request) throws IdInvalidException, MethodArgumentTypeMismatchException {
-		Position position = positionServiceImpl.findById(id);
-		if (position == null)
+    @PutMapping("/{id}")
+    public ResponseEntity<RestData<PositionDTO>> updatePosition(@PathVariable Long id, @RequestBody PositionRequestDTO request) throws IdInvalidException,MethodArgumentTypeMismatchException {
+    	Position position = positionServiceImpl.findById(id);
+		if(position == null)
 			throw new IdInvalidException("Id invalid");
 		position.setPositionName(request.getPositionName());
-		Position updatedPosition = positionServiceImpl.updatePosition(position);
-		PositionDTO updatedPositionDTO = PositionMapperDTO.convertPositionDTO(updatedPosition);
-		RestData<PositionDTO> restData = new RestData<>();
-		restData.setData(updatedPositionDTO);
-		restData.setError(null);
-		restData.setMessage("update position success");
-		restData.setStatus(200);
-		return ResponseEntity.ok(restData);
-	}
-
+        Position updatedPosition = positionServiceImpl.updatePosition(position);
+        PositionDTO updatedPositionDTO = PositionMapperDTO.convertPositionDTO(updatedPosition);
+        RestData<PositionDTO> restData = new RestData<>();
+        restData.setData(updatedPositionDTO);
+        restData.setError(null);
+        restData.setMessage("update position success");
+        restData.setStatus(200);
+        return ResponseEntity.ok(restData);
+    }
+	
+	
+	 
+	
+	
 }

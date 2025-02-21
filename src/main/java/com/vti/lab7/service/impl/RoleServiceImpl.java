@@ -30,18 +30,18 @@ public class RoleServiceImpl implements RoleService {
 		}
 
 	}
-
+	
 	public List<Role> findAll() {
 		return roleRepository.findAll();
 	}
-
+	
 	public Role findById(long id) {
 		Optional<Role> roleOptional = roleRepository.findById(id);
-		if (roleOptional.isPresent())
+		if(roleOptional.isPresent())
 			return roleOptional.get();
 		return null;
 	}
-
+	
 	public void deleteById(long id) {
 		roleRepository.deleteById(id);
 	}

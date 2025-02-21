@@ -5,7 +5,8 @@ import com.vti.lab7.model.Role;
 
 public class RoleMapperDTO {
 	public static final RoleDTO convertToRoleDTO(Role role) {
-		return new RoleDTO(role.getRoleId(), role.getDescription(), role.getRoleName());
+		return new RoleDTO(role.getRoleId(),role.getDescription(),role.getRoleName());
 	}
-
+	
+	
 }
