@@ -14,7 +14,6 @@ import com.vti.lab7.repository.UserRepository;
 import com.vti.lab7.service.UserService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,13 +27,13 @@ public class UserServiceImpl implements UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
-	private final MessageSource messageSource;
 
 	public void init() {
 		if (userRepository.count() == 0) {
 			User user = new User();
 			user.setUsername("hiep");
 			user.setPassword(passwordEncoder.encode("1234"));
+			user.setEmail("hiep@example.com");
 			user.setRole(roleRepository.findByRoleName("ADMIN"));
 			userRepository.save(user);
 		}
