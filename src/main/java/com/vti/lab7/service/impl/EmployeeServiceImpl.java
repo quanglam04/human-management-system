@@ -1,6 +1,7 @@
 package com.vti.lab7.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -120,5 +121,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 	public List<EmployeeDTO> getEmployeesByPosition(Long positionId) {
 		return employeeRepository.findByPositionPositionId(positionId).stream().map(EmployeeMapper::convertToDTO).toList();
 	}
-
+	
+	@Override
+	public EmployeeDTO getEmployeeByUserId(Long userId) {
+		Employee employee = employeeRepository.findByUserUserId(userId).orElse(null);
+		return employee != null ? EmployeeMapper.convertToDTO(employee) : null;
+	}
 }

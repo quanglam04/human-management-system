@@ -1,9 +1,7 @@
 package com.vti.lab7.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
@@ -25,12 +23,12 @@ public class RolePermission {
 	private RolePermissionId id;
 
 	@ManyToOne
-	@MapsId("role")
+	@MapsId("roleId")
 	@JoinColumn(name = "role_id", nullable = false)
 	private Role role;
 
 	@ManyToOne
-	@MapsId("permission")
+	 @MapsId("permissionId") 
 	@JoinColumn(name = "permission_id", nullable = false)
 	private Permission permission;
 
