@@ -22,4 +22,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("email") String email,
             Pageable pageable
     );
+	
+	@Query("SELECT u FROM User u " +
+			"JOIN u.employee e " +
+		    "JOIN e.department d " +
+		    "WHERE d.departmentId = :departmentId AND " +
+            "(:username IS NULL OR u.username LIKE %:username%) AND " +
+            "(:email IS NULL OR u.email LIKE %:email%)")
+	Page<User> findUsersOfDepartment(
+            @Param("username") String username,
+            @Param("email") String email,
+            @Param("departmentId") Long departmentId,
+            Pageable pageable
+    );
+	
 }

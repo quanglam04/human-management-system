@@ -52,7 +52,7 @@ public class Employee {
 	@Temporal(TemporalType.DATE)
 	private Date hireDate;
 
-	@Column(name = "salary", precision = 10, scale = 2)
+	@Column(name = "salary", precision = 10, scale = 2, nullable = true)
 	private BigDecimal salary;
 
 	@Column(name = "status", length = 50)

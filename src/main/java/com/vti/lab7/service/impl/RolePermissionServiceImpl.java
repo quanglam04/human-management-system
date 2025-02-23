@@ -14,6 +14,7 @@ import com.vti.lab7.repository.RolePermissionRepository;
 import com.vti.lab7.repository.RoleRepository;
 import com.vti.lab7.service.RolePermissionService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,7 +26,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
 	public void init() {
 		if (rolePermissionRepository.count() == 0) {
-			Role admin = roleRepository.findByRoleName("ADMIN");
+			Role admin = roleRepository.findByRoleName("ADMIN").orElseThrow(() -> new EntityNotFoundException("khong tim thay role"));
 			List<Permission> permissions = permissionRepository.findAll();
 
 			for (Permission p : permissions) {

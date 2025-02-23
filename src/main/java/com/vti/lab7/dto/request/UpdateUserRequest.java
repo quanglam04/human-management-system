@@ -15,23 +15,15 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewUserRequest {
-	@NotBlank(message = ErrorMessage.INVALID_NOT_BLANK_FIELD)
-	@Size(max = 255, message = ErrorMessage.INVALID_TEXT_LENGTH)
-    @Pattern(regexp = "^[a-z0-9._-]+$", message = "Username chỉ chứa chữ in thường, số, dấu gạch dưới, gạch ngang, dấu chấm")
-    private String username;
+public class UpdateUserRequest {
+//	@Size(max = 255, message = ErrorMessage.INVALID_TEXT_LENGTH)
+//    @Pattern(regexp = "^[a-z0-9._-]+$", message = "Username chỉ chứa chữ in thường, số, dấu gạch dưới, gạch ngang, dấu chấm")
+//    private String username;
 	
 	@Email(message = ErrorMessage.INVALID_FORMAT_EMAIL)
-    @NotBlank(message = ErrorMessage.INVALID_NOT_BLANK_FIELD)
 	@Size(max = 255, message = ErrorMessage.INVALID_TEXT_LENGTH)
     private String email;
 	
-	@NotBlank(message = ErrorMessage.INVALID_NOT_BLANK_FIELD)
-	@Size(max = 255, message = ErrorMessage.INVALID_TEXT_LENGTH)
-	@Pattern(regexp = "^(?=.*[A-Z])(?=.*\\d).+$", message = "Password phải có ít nhất 1 chữ cái viết hoa và 1 số")
-    private String password;
-	
-	@NotBlank(message = ErrorMessage.INVALID_NOT_BLANK_FIELD)
 	@Pattern(
 		    regexp = "EMPLOYER|MANAGER|ADMIN",
 		    message = "Role phải là 1 trong số EMPLOYER, MANAGER, or ADMIN"

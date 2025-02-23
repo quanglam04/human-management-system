@@ -29,7 +29,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService, Custome
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException(""));
+		User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Tài khoản không tồn tại"));
 
 		return new CustomUserDetails(user.getUserId(), user.getUsername(), user.getPassword(),
 				user.getRole().getRolePermissions());
