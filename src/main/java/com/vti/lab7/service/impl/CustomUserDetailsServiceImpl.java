@@ -4,12 +4,14 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import java.util.Collection;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,7 @@ import com.vti.lab7.service.CustomeUserDetailService;
 public class CustomUserDetailsServiceImpl implements CustomeUserDetailService {
 
 	UserRepository userRepository;
-
+	MessageSource messageSource;
 	private Collection<? extends GrantedAuthority> mapToGrantedAuthorities(List<RolePermission> rolePermissions) {
 		return rolePermissions.stream()
 				.map(rolePermission -> new SimpleGrantedAuthority(rolePermission.getPermission().getPermissionName()))
@@ -38,7 +40,6 @@ public class CustomUserDetailsServiceImpl implements CustomeUserDetailService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		User user = userRepository.findByUsername(username).orElseThrow(
 				() -> new UsernameNotFoundException(String.format("User with username '%s' not found.", username)));
-
 		return new CustomUserDetails(user.getUserId(), user.getUsername(), user.getPassword(),
 				user.getRole().getRoleName(), mapToGrantedAuthorities(user.getRole().getRolePermissions()));
 	}

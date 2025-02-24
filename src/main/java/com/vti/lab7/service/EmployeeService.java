@@ -23,5 +23,7 @@ public interface EmployeeService {
 	List<EmployeeDTO> getEmployeesByDepartment(Long departmentId);
 
 	List<EmployeeDTO> getEmployeesByPosition(Long positionId);
+	
+	EmployeeDTO getEmployeeByUserId(Long userId);
 
 }

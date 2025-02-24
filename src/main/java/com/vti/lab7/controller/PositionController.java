@@ -18,7 +18,7 @@ import com.vti.lab7.dto.PositionDTO;
 import com.vti.lab7.dto.mapper.PositionMapperDTO;
 import com.vti.lab7.dto.request.PositionRequestDTO;
 import com.vti.lab7.dto.response.RestData;
-import com.vti.lab7.exception.custom.IdInvalidException;
+import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Position;
 import com.vti.lab7.service.impl.PositionServiceImpl;
 
@@ -47,10 +47,10 @@ public class PositionController {
 	
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('position_read_by_id')")
-	public ResponseEntity<RestData<PositionDTO>> getPositionByID(@PathVariable long id) throws IdInvalidException, MethodArgumentTypeMismatchException{
+	public ResponseEntity<RestData<PositionDTO>> getPositionByID(@PathVariable long id) throws  MethodArgumentTypeMismatchException{
 		Position position = positionServiceImpl.findById(id);
 		if(position == null)
-			throw new IdInvalidException("Id invalid");
+			throw new NotFoundException("Id invalid");
 		RestData<PositionDTO> restData = new RestData<>();
 		restData.setData(PositionMapperDTO.convertPositionDTO(position));
 		restData.setError("null");
@@ -62,10 +62,10 @@ public class PositionController {
 	
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('position_delete_by_id')")
-    public ResponseEntity<RestData<Void>> deletePosition(@PathVariable Long id) throws IdInvalidException, MethodArgumentTypeMismatchException {
+    public ResponseEntity<RestData<Void>> deletePosition(@PathVariable Long id) throws  MethodArgumentTypeMismatchException {
 		Position position = positionServiceImpl.findById(id);
 		if(position == null)
-			throw new IdInvalidException("Id invalid");
+			throw new NotFoundException("Id invalid");
 		positionServiceImpl.deleteById(id);
         RestData<Void> restData = new RestData<>();
         restData.setData(null);
@@ -90,10 +90,11 @@ public class PositionController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('position_update_by_id')")
-    public ResponseEntity<RestData<PositionDTO>> updatePosition(@PathVariable Long id,@Valid @RequestBody PositionRequestDTO request) throws IdInvalidException,MethodArgumentTypeMismatchException {
+    public ResponseEntity<RestData<PositionDTO>> updatePosition(@PathVariable Long id, @RequestBody PositionRequestDTO request) throws MethodArgumentTypeMismatchException {
+
     	Position position = positionServiceImpl.findById(id);
 		if(position == null)
-			throw new IdInvalidException("Id invalid");
+			throw new NotFoundException("Id invalid");
 		position.setPositionName(request.getPositionName());
         Position updatedPosition = positionServiceImpl.updatePosition(position);
         PositionDTO updatedPositionDTO = PositionMapperDTO.convertPositionDTO(updatedPosition);

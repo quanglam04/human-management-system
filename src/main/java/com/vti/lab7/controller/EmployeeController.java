@@ -2,9 +2,7 @@ package com.vti.lab7.controller;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.security.access.prepost.PreAuthorize;
-
 import org.springframework.web.bind.annotation.*;
 
 import com.vti.lab7.dto.EmployeeDTO;
@@ -23,6 +21,7 @@ import java.util.List;
 public class EmployeeController {
 
 	private final EmployeeService employeeService;
+
 	@PreAuthorize("hasAuthority('employee.read')")
 	@GetMapping
 	public ResponseEntity<Object> getAllEmployees(@RequestParam(required = false) String firstName,
@@ -34,7 +33,6 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-
 	@PreAuthorize("hasAuthority('employee.read')")
 	@GetMapping("/{id}")
 	public ResponseEntity<Object> getEmployeeById(@PathVariable Long id) {
@@ -42,8 +40,6 @@ public class EmployeeController {
 		RestData<?> restData = new RestData<>(200, null, null, responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
-
-
 
 	@PreAuthorize("hasAuthority('employee.create')")
 	@PostMapping
@@ -53,15 +49,13 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('update_employee')")
+	@PreAuthorize("hasAuthority('employee.update')")
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employee) {
 		EmployeeDTO responseDto = employeeService.updateEmployee(id, employee);
 		RestData<?> restData = new RestData<>(200, null, null, responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
-
-
 
 	@PreAuthorize("hasAuthority('employee.delete')")
 	@DeleteMapping("/{id}")
@@ -72,8 +66,7 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-
-	@PreAuthorize("hasAuthority('employee.department.read')")
+	@PreAuthorize("hasAuthority('employee.read')")
 	@GetMapping("/department/{departmentId}")
 	public ResponseEntity<Object> getEmployeesByDepartment(@PathVariable Long departmentId) {
 		List<EmployeeDTO> responseDto = employeeService.getEmployeesByDepartment(departmentId);
@@ -81,8 +74,7 @@ public class EmployeeController {
 		return ResponseEntity.ok().body(restData);
 	}
 
-
-	@PreAuthorize("hasAuthority('employee.position.read')")
+	@PreAuthorize("hasAuthority('employee.read')")
 	@GetMapping("/position/{positionId}")
 	public ResponseEntity<Object> getEmployeesByPosition(@PathVariable Long positionId) {
 		List<EmployeeDTO> responseDto = employeeService.getEmployeesByPosition(positionId);
