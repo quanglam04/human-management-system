@@ -1,141 +1,109 @@
 package com.vti.lab7.service.impl;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.dao.DataIntegrityViolationException;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 
+import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.dto.PermissionDTO;
 import com.vti.lab7.dto.mapper.PermissionMapper;
+import com.vti.lab7.exception.custom.ConflictException;
+import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Permission;
 import com.vti.lab7.model.Role;
 import com.vti.lab7.repository.PermissionRepository;
 import com.vti.lab7.service.PermissionService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class PermissionServiceImpl implements PermissionService {
 
-	@Autowired
-	private MessageSource messageSource;
+	private Map<String, String> permissionMap = Map.ofEntries(
+			// User
+			Map.entry("get_all_users", "Lấy danh sách tất cả người dùng"),
+			Map.entry("get_department_users", "Lấy danh sách người dùng thuộc phòng ban của mình"),
+			Map.entry("get_own_info", "Lấy thông tin của chính mình"),
+			Map.entry("get_user_by_id", "Lấy thông tin của bất kỳ người dùng nào"),
+			Map.entry("get_department_user_by_id", "Lấy thông tin của người dùng thuộc phòng ban của mình"),
+			Map.entry("create_user_any_role", "Tạo người dùng mới với bất kỳ vai trò nào"),
+			Map.entry("create_employee_in_department",
+					"Tạo người dùng mới với vai trò Employee cho phòng ban của mình"),
+			Map.entry("update_any_user", "Cập nhật thông tin của bất kỳ người dùng nào"),
+			Map.entry("update_department_user", "Cập nhật thông tin của người dùng thuộc phòng ban của mình"),
+			Map.entry("update_own_info", "Cập nhật thông tin của chính mình"),
+			Map.entry("delete_any_user", "Xóa bất kỳ người dùng nào"),
 
-	private String getMessage(String key) {
-		return messageSource.getMessage(key, null, "Default message", LocaleContextHolder.getLocale());
-	}
+			// Department
+			Map.entry("get_all_departments", "Lấy tất cả các văn phòng ra"),
+			Map.entry("create_new_departments", "Tạo văn phòng mới"),
+			Map.entry("update_departments", "Sửa các văn phòng cũ"),
+			Map.entry("delete_department_by_id", "Xóa các văn phòng"),
+			Map.entry("get_department_by_id", "Lấy văn phòng theo ID"),
 
-	private List<String> permissionNames = List.of(
-            "get_all_users", 
-            "get_department_users", 
-            "get_own_info",
-            "get_user_by_id", 
-            "get_department_user_by_id", 
-            
-            "create_user_any_role", 
-            "create_employee_in_department",
-            "update_any_user", 
-            "update_department_user", 
-            "update_own_info", 
-            "delete_any_user", 
-            "get_all_departments",
-            "create_new_departments", 
-            "update_departments", 
-            "delete_departments", 
-            "get_all_role_permissions",
-            "delete_any_user",
-            
-            "employee_read", 
-            "employee_create", 
-            "employee_update", 
-            "employee_delete", 
-            "employee_department_read",
-            "employee_position_read",
-            
-            "role_read_all",
-            "role_read_role_by_id",
-            "role_create",
-            "role_update_role_by_id",
-            "role_delete_role_by_id",
-            
-            "position_read_all",
-            "position_read_by_id",
-            "position_create",
-            "position_update_by_id",
-            "position_delete_by_id"
-            );
-            
-    private List<String> descriptions = List.of(
-            "Lấy danh sách tất cả người dùng",
-            "Lấy danh sách người dùng thuộc phòng ban của mình", 
-            "Lấy thông tin của chính mình",
-            "Lấy thông tin của bất kỳ người dùng nào", 
-            "Lấy thông tin của người dùng thuộc phòng ban của mình",
-            "Tạo người dùng mới với bất kỳ vai trò nào",
-            "Tạo người dùng mới với vai trò Employee cho phòng ban của mình",
-            "Cập nhật thông tin của bất kỳ người dùng nào",
-            "Cập nhật thông tin của người dùng thuộc phòng ban của mình", 
-            "Cập nhật thông tin của chính mình",
-            "Xóa bất kỳ người dùng nào", 
-            "Lấy tất cả các văn phòng ra", 
-            "Tạo văn phòng mới", 
-            "Sửa các văn phòng cũ",
-            "Xóa các văn phòng", 
-            "Lấy danh sách tất cả các mối quan hệ giữa vai trò và quyền",
-            "Xóa bất kỳ người dùng nào",
-            "Xem danh sách nhân viên", 
-            "Tạo mới nhân viên", 
-            "Cập nhật thông tin nhân viên", 
-            "Xóa nhân viên",
-            "Xem danh sách nhân viên trong phòng ban", 
-            "Xem danh sách nhân viên theo vị trí",
-            "Lấy danh sách tất cả các vai trò",
-            "Lấy thông tin chi tiết của 1 vai trò theo ID",
-            "Tạo một vai trò mới",
-            "Cập nhật thông tin vai trò theo ID",
-            "Xóa một vai trò theo ID",
-            "Lấy danh sách tất cả các vị trí",
-            "Lấy thông tin của một vị trí theo ID",
-            "Tạo một vị trí mới",
-            "Cập nhật thông tin một vị trí theo ID",
-            "Xóa một vị trí theo ID"
-            );
+
+			// Role-Permission
+			Map.entry("get_all_role_permissions", "Lấy danh sách tất cả các mối quan hệ giữa vai trò và quyền"),
+			Map.entry("get_role_permission_by_permission_id",
+					"Lấy thông tin chi tiết của một mối quan hệ giữa vai trò và quyền theo ID vai trò và ID Quyền"),
+			Map.entry("create_new_role_permission", "Tạo mối quan hệ mới giữa vai trò và quyền"),
+			Map.entry("get_list_permissions_of_role", "Lấy tất cả các quyền của một vai trò"),
+			Map.entry("get_list_role_has_one_permission", "Lấy danh sách các vai trò có 1 quyền"),
+			Map.entry("delete_role_permission",
+					"Xóa một mối quan hệ giữa vai trò và quyền theo ID vai trò và ID Quyền"),
+			Map.entry("get_permissions_by_role_id", "Lấy tất cả các quyền của một vai trò cụ thể"),
+			Map.entry("get_role_by_permissions_id", "Lấy danh sách vai trò bằng ID quyền"),
+
+			// Role
+			Map.entry("role_read_all", "Lấy danh sách tất cả các vai trò"),
+			Map.entry("role_read_role_by_id", "Lấy thông tin chi tiết của 1 vai trò theo ID"),
+			Map.entry("role_delete_role_by_id", "Tạo một vai trò mới"),
+			Map.entry("role_create", "Cập nhật thông tin vai trò theo ID"),
+			Map.entry("role_update_role_by_id", "Xóa một vai trò theo ID"),
+			
+			//Position
+			Map.entry("position_delete_by_id", "Xóa một vai trò theo ID"),
+			Map.entry("position_create", "Xóa một vai trò theo ID"),
+			Map.entry("position_update_by_id", "Xóa một vai trò theo ID"),
+
+			// Employee
+			Map.entry("employee_read_all", "Xem danh sách nhân viên"),
+			Map.entry("employee_read_department", "Tạo mới nhân viên"),
+			Map.entry("employee_read_self", "Cập nhật thông tin nhân viên"),
+			Map.entry("employee_create_all", "Xóa nhân viên"),
+			Map.entry("employee_create_department", "Xem danh sách nhân viên trong phòng ban"),
+			Map.entry("employee_update_all", "Xem danh sách nhân viên theo vị trí"),
+			Map.entry("employee_update_department", "Xem danh sách nhân viên"),
+			Map.entry("employee_update_self", "Xem danh sách nhân viên"),
+			Map.entry("employee_delete_all", "Xem danh sách nhân viên"),
+			Map.entry("read_employee_by_department", "Xem danh sách nhân viên"),
+			Map.entry("read_employee_by_position", "Xem danh sách nhân viên"),
+			// Permission
+			Map.entry("read_permission", "Xem danh sách quyền"), 
+			Map.entry("create_permission", "Tạo mới quyền"),
+			Map.entry("update_permission", "Cập nhật thông tin quyền"), 
+			Map.entry("get_role_by_permissions_id", "Cập nhật thông tin quyền"), 
+			Map.entry("delete_permission", "Xóa quyền"));
+
 
 	private final PermissionRepository permissionRepository;
 
 	private Permission getEntity(Long id) {
 		return permissionRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(String.format("Permission with ID %d not found.", id)));
+				.orElseThrow(() -> new NotFoundException(ErrorMessage.Permission.ERR_NOT_FOUND_ID, id));
 	}
 
 	@Override
 	public void init() {
-		if (permissionNames.size() != descriptions.size()) {
-			throw new IllegalStateException(
-					"Số lượng permission_names và descriptions không khớp! " + "permission_names.size() = "
-							+ permissionNames.size() + ", descriptions.size() = " + descriptions.size());
-		}
-
 		if (permissionRepository.count() == 0) {
-			for (int i = 0; i < permissionNames.size(); i++) {
-				permissionRepository.save(new Permission(permissionNames.get(i), descriptions.get(i)));
-			}
+			permissionMap.forEach((permissionName, description) -> {
+				permissionRepository.save(new Permission(permissionName, description));
+			});
 		}
 	}
 
 	@Override
-	public List<Role> findRolesByPermissionId(Long permissionId) {
-		List<Role> permissions = permissionRepository.findRolesByPermissionId(permissionId);
-		if (permissions.isEmpty()) {
-			throw new EntityNotFoundException(getMessage("error.permissions.notfound"));
-		}
-		return permissions;
-	}
-
 	public List<PermissionDTO> getAllPermissions() {
 		return permissionRepository.findAll().stream().map(PermissionMapper::mapToDTO).toList();
 	}
@@ -156,8 +124,7 @@ public class PermissionServiceImpl implements PermissionService {
 	public PermissionDTO createPermission(PermissionDTO permissionDTO) {
 		Permission permission = PermissionMapper.mapToEntity(permissionDTO);
 		if (permissionRepository.existsByPermissionName(permission.getPermissionName())) {
-			throw new DataIntegrityViolationException(
-					String.format("Permission with name '%s' already exists.", permission.getPermissionName()));
+			throw new ConflictException(ErrorMessage.Permission.ERR_DUPLICATE_NAME, permission.getPermissionName());
 		}
 
 		permissionRepository.save(permission);
@@ -170,8 +137,7 @@ public class PermissionServiceImpl implements PermissionService {
 
 		if (!existingPermission.getPermissionName().equals(permissionDTO.getPermissionName())
 				&& permissionRepository.existsByPermissionName(permissionDTO.getPermissionName())) {
-			throw new DataIntegrityViolationException(
-					String.format("Permission with name '%s' already exists.", permissionDTO.getPermissionName()));
+			throw new ConflictException(ErrorMessage.Permission.ERR_DUPLICATE_NAME, permissionDTO.getPermissionName());
 		}
 
 		existingPermission.setPermissionName(permissionDTO.getPermissionName());
@@ -182,4 +148,12 @@ public class PermissionServiceImpl implements PermissionService {
 		return PermissionMapper.mapToDTO(existingPermission);
 	}
 
+	@Override
+	public List<Role> findRolesByPermissionId(Long permissionId) {
+		List<Role> roles = permissionRepository.findRolesByPermissionId(permissionId);
+		if (roles.isEmpty()) {
+			throw new NotFoundException(ErrorMessage.Permission.ERR_NOT_FOUND_ID, permissionId);
+		}
+		return roles;
+	}
 }
