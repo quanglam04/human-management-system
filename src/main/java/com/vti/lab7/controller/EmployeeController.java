@@ -3,8 +3,10 @@ package com.vti.lab7.controller;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.vti.lab7.config.CustomUserDetails;
 import com.vti.lab7.dto.EmployeeDTO;
 import com.vti.lab7.dto.response.PaginationResponseDto;
 import com.vti.lab7.dto.response.RestData;
@@ -22,42 +24,57 @@ public class EmployeeController {
 
 	private final EmployeeService employeeService;
 
-	@PreAuthorize("hasAuthority('read_employee')")
+	@PreAuthorize("hasAnyAuthority('employee_read_all', 'employee_read_department')")
 	@GetMapping
 	public ResponseEntity<Object> getAllEmployees(@RequestParam(required = false) String firstName,
 			@RequestParam(required = false) String lastName, @RequestParam(required = false) String phoneNumber,
-			@RequestParam(required = false) String status, Pageable pageable) {
+			@RequestParam(required = false) String status, Pageable pageable, Authentication authentication) {
+		CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
+
 		PaginationResponseDto<EmployeeDTO> responseDto = employeeService.getAllEmployees(firstName, lastName,
-				phoneNumber, status, pageable);
+				phoneNumber, status, pageable, currentUser);
+
 		RestData<?> restData = new RestData<>(200, null, null, responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('read_employee')")
+	@PreAuthorize("hasAnyAuthority('employee_read_all', 'employee_read_department', 'employee_read_self')")
 	@GetMapping("/{id}")
-	public ResponseEntity<Object> getEmployeeById(@PathVariable Long id) {
-		EmployeeDTO responseDto = employeeService.getEmployeeById(id);
+	public ResponseEntity<Object> getEmployeeById(@PathVariable Long id, Authentication authentication) {
+		CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
+
+		EmployeeDTO responseDto = employeeService.getEmployeeById(id, currentUser);
+
 		RestData<?> restData = new RestData<>(200, null, null, responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('create_employee')")
+	@PreAuthorize("hasAnyAuthority('employee_create_all', 'employee_create_department')")
 	@PostMapping
-	public ResponseEntity<Object> createEmployee(@Valid @RequestBody EmployeeDTO employee) {
-		EmployeeDTO responseDto = employeeService.createEmployee(employee);
+	public ResponseEntity<Object> createEmployee(@Valid @RequestBody EmployeeDTO employee,
+			Authentication authentication) {
+
+		CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
+
+		EmployeeDTO responseDto = employeeService.createEmployee(employee, currentUser);
+
 		RestData<?> restData = new RestData<>(200, null, null, responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('update_employee')")
+	@PreAuthorize("hasAnyAuthority('employee_update_all', 'employee_update_department', 'employee_update_self')")
 	@PutMapping("/{id}")
-	public ResponseEntity<Object> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employee) {
-		EmployeeDTO responseDto = employeeService.updateEmployee(id, employee);
+	public ResponseEntity<Object> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employee,
+			Authentication authentication) {
+		CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
+
+		EmployeeDTO responseDto = employeeService.updateEmployee(id, employee, currentUser);
 		RestData<?> restData = new RestData<>(200, null, null, responseDto);
+
 		return ResponseEntity.ok().body(restData);
 	}
 
-	@PreAuthorize("hasAuthority('delete_employee')")
+	@PreAuthorize("hasAuthority('employee_delete_all')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> deleteEmployee(@PathVariable Long id) {
 		employeeService.deleteEmployee(id);

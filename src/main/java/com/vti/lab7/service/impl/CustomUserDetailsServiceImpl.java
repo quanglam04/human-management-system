@@ -4,10 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,11 +27,11 @@ import com.vti.lab7.service.CustomeUserDetailService;
 public class CustomUserDetailsServiceImpl implements CustomeUserDetailService {
 
 	UserRepository userRepository;
-	MessageSource messageSource;
+
 	private Collection<? extends GrantedAuthority> mapToGrantedAuthorities(List<RolePermission> rolePermissions) {
 		return rolePermissions.stream()
 				.map(rolePermission -> new SimpleGrantedAuthority(rolePermission.getPermission().getPermissionName()))
-				.toList();
+				.collect(Collectors.toSet());
 	}
 
 	@Override
