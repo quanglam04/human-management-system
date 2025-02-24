@@ -102,4 +102,9 @@ public class ErrorMessage {
 	public static class Department {
 		public static final String ERR_NOT_FOUND_ID = "exception.department.not.found.id";
 	}
+
+	public static class Permission {
+		public static final String ERR_NOT_FOUND_ID = "exception.permission.not.found.id";
+		public static final String ERR_DUPLICATE_NAME = "exception.permission.duplicate.username.email";
+	}
 }

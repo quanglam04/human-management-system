@@ -1,6 +1,7 @@
 package com.vti.lab7.service.impl;
 
 import java.util.List;
+import java.util.logging.ErrorManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -8,8 +9,11 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.dto.PermissionDTO;
 import com.vti.lab7.dto.mapper.PermissionMapper;
+import com.vti.lab7.exception.custom.ConflictException;
+import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Permission;
 import com.vti.lab7.model.Role;
 import com.vti.lab7.repository.PermissionRepository;
@@ -21,13 +25,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PermissionServiceImpl implements PermissionService {
-
-	@Autowired
-	private MessageSource messageSource;
-
-	private String getMessage(String key) {
-		return messageSource.getMessage(key, null, "Default message", LocaleContextHolder.getLocale());
-	}
 
 	private List<String> permissionNames = List.of("get_all_users", "get_department_users", "get_own_info",
 			"get_user_by_id", "get_department_user_by_id", "create_user_any_role", "create_employee_in_department",
@@ -58,12 +55,11 @@ public class PermissionServiceImpl implements PermissionService {
 			"Lấy danh sách tất cả các vai trò", "Lấy thông tin chi tiết của 1 vai trò theo ID", "Tạo một vai trò mới",
 			"Cập nhật thông tin vai trò theo ID", "Xóa một vai trò theo ID");
 
-
 	private final PermissionRepository permissionRepository;
 
 	private Permission getEntity(Long id) {
 		return permissionRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException(String.format("Permission with ID %d not found.", id)));
+				.orElseThrow(() -> new NotFoundException(ErrorMessage.Permission.ERR_NOT_FOUND_ID, id));
 	}
 
 	@Override
@@ -82,14 +78,6 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 
 	@Override
-	public List<Role> findRolesByPermissionId(Long permissionId) {
-		List<Role> permissions = permissionRepository.findRolesByPermissionId(permissionId);
-		if (permissions.isEmpty()) {
-			throw new EntityNotFoundException(getMessage("error.permissions.notfound"));
-		}
-		return permissions;
-	}
-
 	public List<PermissionDTO> getAllPermissions() {
 		return permissionRepository.findAll().stream().map(PermissionMapper::mapToDTO).toList();
 	}
@@ -110,8 +98,7 @@ public class PermissionServiceImpl implements PermissionService {
 	public PermissionDTO createPermission(PermissionDTO permissionDTO) {
 		Permission permission = PermissionMapper.mapToEntity(permissionDTO);
 		if (permissionRepository.existsByPermissionName(permission.getPermissionName())) {
-			throw new DataIntegrityViolationException(
-					String.format("Permission with name '%s' already exists.", permission.getPermissionName()));
+			throw new ConflictException(ErrorMessage.Permission.ERR_DUPLICATE_NAME, permission.getPermissionName());
 		}
 
 		permissionRepository.save(permission);
@@ -124,8 +111,7 @@ public class PermissionServiceImpl implements PermissionService {
 
 		if (!existingPermission.getPermissionName().equals(permissionDTO.getPermissionName())
 				&& permissionRepository.existsByPermissionName(permissionDTO.getPermissionName())) {
-			throw new DataIntegrityViolationException(
-					String.format("Permission with name '%s' already exists.", permissionDTO.getPermissionName()));
+			throw new ConflictException(ErrorMessage.Permission.ERR_DUPLICATE_NAME, permissionDTO.getPermissionName());
 		}
 
 		existingPermission.setPermissionName(permissionDTO.getPermissionName());
@@ -136,4 +122,12 @@ public class PermissionServiceImpl implements PermissionService {
 		return PermissionMapper.mapToDTO(existingPermission);
 	}
 
+	@Override
+	public List<Role> findRolesByPermissionId(Long permissionId) {
+		List<Role> roles = permissionRepository.findRolesByPermissionId(permissionId);
+		if (roles.isEmpty()) {
+			throw new NotFoundException(ErrorMessage.Permission.ERR_NOT_FOUND_ID, permissionId);
+		}
+		return roles;
+	}
 }
