@@ -1,5 +1,4 @@
 package com.vti.lab7.controller;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +21,7 @@ import com.vti.lab7.service.impl.DepartmentService;
 
 @RestController
 @RequestMapping("api/v1/departments")
-public class DepartmentController {
+public class DepartmentController{
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -33,7 +32,6 @@ public class DepartmentController {
 		Optional<Department> departmentOptional = departmentService.findDepartment(id);
 		return departmentOptional.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
-
 	@PostMapping()
 	@PreAuthorize("hasAuthority('create_new_department')")
 	public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
@@ -78,5 +76,6 @@ public class DepartmentController {
 	}
 	
 	
+
 	
 }

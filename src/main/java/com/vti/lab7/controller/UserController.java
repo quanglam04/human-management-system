@@ -131,7 +131,6 @@ public class UserController {
 		}
 		return ResponseEntity.ok().body(restData);
 	}
-	
 	@PostMapping
 	@PreAuthorize("hasAuthority('create_user_any_role') or hasAuthority('create_employee_in_department')")
 	public ResponseEntity<RestData<?>> postNewUser(
