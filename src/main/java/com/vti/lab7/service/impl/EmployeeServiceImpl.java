@@ -1,6 +1,7 @@
 package com.vti.lab7.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.vti.lab7.exception.custom.ForbiddenException;
 import com.vti.lab7.exception.custom.NotFoundException;
@@ -264,4 +265,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 				.toList();
 	}
 
+	
+	@Override
+	public EmployeeDTO getEmployeeByUserId(Long userId) {
+		Employee employee = employeeRepository.findByUserUserId(userId).orElse(null);
+		return employee != null ? EmployeeMapper.convertToDTO(employee) : null;
+	}
 }
+
+
+}
+

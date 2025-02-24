@@ -35,6 +35,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
 	public void init() {
 		if (rolePermissionRepository.count() == 0) {
+
 			Role admin = roleRepository.findByRoleName("ADMIN");
 			List<Permission> adminPermissions = permissionRepository.findAll();
 
@@ -100,6 +101,24 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 		return rolePermissionRepository.deleteRolePermission(rolePermissionId.getPermissionId(),
 				rolePermissionId.getRoleId());
 	}
+
+
+	 public List<RolePermission> getPermissionsByRoleId(Long roleId) {
+	        return rolePermissionRepository.findById_RoleId(roleId);
+	    }
+
+	@Override
+	public List<Permission> findPermissionsByRoleId(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Role> findRolesByPermissionId(Long permissionId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}
 
 	
 }

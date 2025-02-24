@@ -146,7 +146,7 @@ public class RestExceptionHandler {
 		int code = 400;
 		String moreInformation = "http://localhost:8080/api/v1/exception/400";
 
-		ErrorResponse response = new ErrorResponse(message, detailMessage, errors, code, moreInformation);
+		ErrorResponse response = new ErrorResponse(message, "Điền thông tin không đúng yêu cầu", errors, code, moreInformation);
 		log.error(detailMessage + "\n" + errors.toString(), exception);
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
