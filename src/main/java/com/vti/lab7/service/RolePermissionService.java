@@ -25,6 +25,4 @@ public interface RolePermissionService {
 	
 	public List<Role> findRolesByPermissionId(Long permissionId);
 
-
-
 }

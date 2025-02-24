@@ -2,11 +2,18 @@ package com.vti.lab7.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.vti.lab7.dto.RolePermissionDTO;
 import com.vti.lab7.model.RolePermission;
 import com.vti.lab7.model.RolePermissionId;
 import com.vti.lab7.service.impl.RolePermissionServiceImpl;
+
+import lombok.AllArgsConstructor;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("api/v1/role-permissions")
+@AllArgsConstructor
 public class RolePermissionController {
 
 	@Autowired
@@ -26,12 +34,16 @@ public class RolePermissionController {
 
 	@GetMapping()
 	@PreAuthorize("hasAuthority('get_all_role_permissions')")
-	public ResponseEntity<List<RolePermission>> findALl() {
-		List<RolePermission> role_permissions = rolePermissionServiceImpl.findAll();
-		if (role_permissions.isEmpty()) {
+	public ResponseEntity<List<RolePermissionDTO>> findAll() {
+		List<RolePermissionDTO> rolePermissionDTOs = rolePermissionServiceImpl.findAll().stream()
+				.map(rp -> new RolePermissionDTO(rp.getRole().getRoleId(), rp.getRole().getRoleName(),
+						rp.getPermission().getPermissionId(), rp.getPermission().getPermissionName()))
+				.collect(Collectors.toList());
+
+		if (rolePermissionDTOs.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
-		return ResponseEntity.ok(role_permissions);
+		return ResponseEntity.ok(rolePermissionDTOs);
 	}
 
 	@GetMapping("/{roleId}/{permissionId}")

@@ -120,5 +120,3 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	}
 }
 
-	
-

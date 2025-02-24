@@ -3,6 +3,8 @@ package com.vti.lab7.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,6 +39,7 @@ public class Permission {
 	private String description;
 
 	@OneToMany(mappedBy = "permission", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore
 	private List<RolePermission> rolePermissions = new ArrayList<>();
 
 	public Permission(String permissionName, String description) {
