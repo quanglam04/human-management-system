@@ -82,8 +82,7 @@ public class PermissionServiceImpl implements PermissionService {
 			// Permission
 			Map.entry("read_permission", "Xem danh sách quyền"), 
 			Map.entry("create_permission", "Tạo mới quyền"),
-			Map.entry("update_permission", "Cập nhật thông tin quyền"), 
-			Map.entry("get_role_by_permissions_id", "Cập nhật thông tin quyền"), 
+			Map.entry("update_permission", "Cập nhật thông tin quyền"),
 			Map.entry("delete_permission", "Xóa quyền"));
 
 
