@@ -3,9 +3,7 @@ package com.vti.lab7.exception;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -16,17 +14,16 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
 import com.vti.lab7.dto.response.ErrorResponse;
+import com.vti.lab7.exception.custom.*;
 
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.FieldError;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
@@ -42,6 +39,10 @@ public class RestExceptionHandler {
 
 	private String getMessage(String key) {
 		return messageSource.getMessage(key, null, "Default message", LocaleContextHolder.getLocale());
+	}
+
+	private String getMessage(String key, Object[] params) {
+		return messageSource.getMessage(key, params, "Default message", LocaleContextHolder.getLocale());
 	}
 
 	// Default exception
@@ -228,5 +229,72 @@ public class RestExceptionHandler {
 		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
 		log.error(detailMessage, exception);
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
 	}
+
+	@ExceptionHandler(NotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ResponseEntity<Object> handleNotFoundException(NotFoundException ex) {
+		String message = getMessage(ex.getMessage(), ex.getParams());
+		String detailMessage = ex.getLocalizedMessage();
+		int code = HttpStatus.NOT_FOUND.value();
+		String moreInformation = "http://localhost:8080/api/v1/exception/404" + code;
+
+		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
+		log.error(detailMessage, ex);
+		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+	}
+
+	@ExceptionHandler(BadRequestException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<Object> handleBadRequestException(BadRequestException ex) {
+		String message = getMessage(ex.getMessage(), ex.getParams());
+		String detailMessage = ex.getLocalizedMessage();
+		int code = HttpStatus.BAD_REQUEST.value();
+		String moreInformation = "http://localhost:8080/api/v1/exception/400" + code;
+
+		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
+		log.error(detailMessage, ex);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(UnauthorizedException.class)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException ex) {
+		String message = getMessage("AuthenticationException.message");
+		String detailMessage = ex.getLocalizedMessage();
+		int code = HttpStatus.UNAUTHORIZED.value();
+		String moreInformation = "http://localhost:8080/api/v1/exception/401" + code;
+
+		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
+		log.error(detailMessage, ex);
+		return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+	}
+
+	@ExceptionHandler(ForbiddenException.class)
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ResponseEntity<Object> handleForbiddenException(ForbiddenException ex) {
+		String message = getMessage("AccessDeniedException.message");
+		String detailMessage = ex.getLocalizedMessage();
+		int code = HttpStatus.FORBIDDEN.value();
+		String moreInformation = "http://localhost:8080/api/v1/exception/403" + code;
+
+		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
+		log.error(detailMessage, ex);
+		return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+	}
+
+	@ExceptionHandler(ConflictException.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ResponseEntity<Object> handleConflictException(ConflictException exception) {
+		String message = getMessage(exception.getMessage(), exception.getParams());
+		String detailMessage = exception.getLocalizedMessage();
+		int code = 409;
+		String moreInformation = "http://localhost:8080/api/v1/exception/409";
+
+		ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
+		log.error(detailMessage, exception);
+		return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+	}
+
 }

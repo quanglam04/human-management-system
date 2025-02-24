@@ -25,7 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.vti.lab7.config.jwt.JwtAuthenticationFilter;
 import com.vti.lab7.exception.AuthExceptionHandler;
-import com.vti.lab7.service.impl.CustomUserDetailsServiceImpl;
+import com.vti.lab7.service.CustomeUserDetailService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,24 +39,24 @@ public class SecurityConfig {
 
 	private static final String[] WHITE_LIST_URL = { "/api/v1/users/login", "/api/v1/users/refresh-token", };
 
-	CustomUserDetailsServiceImpl userDetailsService;
+	CustomeUserDetailService userDetailsService;
 
 	JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	AuthExceptionHandler authExceptionHandler;
 
 	@Bean
-	public PasswordEncoder passwordEncoder() {
+	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+	AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 		return config.getAuthenticationManager();
 	}
 
 	@Bean
-	public AuthenticationProvider authenticationProvider() {
+	AuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 		authProvider.setUserDetailsService(userDetailsService);
 		authProvider.setPasswordEncoder(passwordEncoder());
@@ -64,7 +64,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable).cors(Customizer.withDefaults())
 				.authorizeHttpRequests(
 						registry -> registry.requestMatchers(WHITE_LIST_URL).permitAll().anyRequest().authenticated())
@@ -77,7 +77,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
+	CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(List.of("http://localhost:3000"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));

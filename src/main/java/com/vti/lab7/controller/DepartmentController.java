@@ -22,7 +22,7 @@ import com.vti.lab7.service.impl.DepartmentService;
 
 @RestController
 @RequestMapping("api/v1/departments")
-public class DepartmentController {
+public class DepartmentController{
 
 	@Autowired
 	private DepartmentService departmentService;
@@ -68,6 +68,7 @@ public class DepartmentController {
 
 		return ResponseEntity.ok(existingDepartment);
 	}
+
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('delete_department_by_id')")
 	public ResponseEntity<Object> deleteDepartment(@PathVariable Long id) {
@@ -76,7 +77,5 @@ public class DepartmentController {
 		return ResponseEntity.ok().body(restData);
 
 	}
-	
-	
-	
+
 }

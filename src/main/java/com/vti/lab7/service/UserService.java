@@ -26,5 +26,6 @@ public interface UserService {
 	UserDTO updateUserDepartment(@Valid UpdateUserRequest userRequest, long userId, Department department);
 	void deleteUser(long userId);
 	public LoginResponseDto login(LoginRequestDto request);
+
 	public void init();
 }

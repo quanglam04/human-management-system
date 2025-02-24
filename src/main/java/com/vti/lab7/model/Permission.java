@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -25,19 +26,24 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(name = "permissions")
 public class Permission {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long permissionId;
+	@Column(name = "permission_id")
+	private Long permissionId;
 
+	@Column(name = "permission_name", nullable = false, length = 255)
 	private String permissionName;
+
+	@Column(name = "description")
 	private String description;
 
-	@JsonIgnore
 	@OneToMany(mappedBy = "permission", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonIgnore
 	private List<RolePermission> rolePermissions = new ArrayList<>();
 
-	public Permission(String permission_name, String description) {
-		this.permissionName = permission_name;
+	public Permission(String permissionName, String description) {
+		this.permissionName = permissionName;
 		this.description = description;
 	}
 

@@ -12,7 +12,7 @@ import java.util.Locale;
 public class MessageSourceConfig {
 
 	@Bean
-	public MessageSource messageSource() {
+	MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasename("classpath:i18n/messages");
 		messageSource.setDefaultEncoding("UTF-8");
@@ -21,7 +21,7 @@ public class MessageSourceConfig {
 	}
 
 	@Bean
-	public LocalValidatorFactoryBean getValidator() {
+	LocalValidatorFactoryBean getValidator() {
 		LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
 		bean.setValidationMessageSource(messageSource());
 		return bean;

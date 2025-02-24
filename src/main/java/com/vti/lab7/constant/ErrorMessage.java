@@ -88,6 +88,18 @@ public class ErrorMessage {
 		public static final String INVALID_EMAIL = "exception.user.invalid.email";
 		public static final String ERR_NOT_ALLOWED_SUPER_ADMIN = "exception.user.not.allowed.super.admin";
 		public static final String ERR_DUPLICATE_USERNAME_EMAIL = "exception.user.duplicate.username.email";
+		public static final String ERR_USER_ALREADY_ASSIGNED = "exception.user.already.assigned.to.employee";
 	}
 
+	public static class Employee {
+		public static final String ERR_NOT_FOUND_ID = "exception.employee.not.found.id";
+	}
+
+	public static class Position {
+		public static final String ERR_NOT_FOUND_ID = "exception.position.not.found.id";
+	}
+
+	public static class Department {
+		public static final String ERR_NOT_FOUND_ID = "exception.department.not.found.id";
+	}
 }
