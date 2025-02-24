@@ -20,5 +20,4 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 
 	Optional<Employee> findByUserUsername(String username);
 
-	Optional<Employee> findByEmployeeIdAndDepartmentDepartmentId(Long employeeId, Long departmentId);
 }
