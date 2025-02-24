@@ -48,7 +48,9 @@ public class RoleController {
 
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('role_read_role_by_iD')")
+
 	public ResponseEntity<RestData<?>> getRoleById(@PathVariable long id) throws MethodArgumentTypeMismatchException{
+
 		Role role = roleServiceImpl.findById(id);
 		if (role == null)
 			throw new NotFoundException("ID invalid");
@@ -62,7 +64,9 @@ public class RoleController {
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('role_delete_role_by_id')")
+
 	public ResponseEntity<String> deleteRole(@PathVariable long id) throws MethodArgumentTypeMismatchException{
+
 		Role role = roleServiceImpl.findById(id);
 		if (role == null)
 			throw new NotFoundException("Id invalid");
@@ -95,6 +99,7 @@ public class RoleController {
 	
 	@PutMapping("/{id}")
 	@PreAuthorize("hasAuthority('role_update_role_by_id')")
+
 	public ResponseEntity<RestData<RoleDTO>> updateRole(@PathVariable long id, @RequestBody RoleRequestDTO roleRequestDTO) throws ConflictException {
 
 		Role role = roleServiceImpl.findById(id);

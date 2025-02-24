@@ -102,7 +102,6 @@ public class PermissionServiceImpl implements PermissionService {
             "Xóa một vị trí theo ID"
             );
 
-
 	private final PermissionRepository permissionRepository;
 
 	private Permission getEntity(Long id) {

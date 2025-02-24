@@ -47,7 +47,10 @@ public class PositionController {
 	
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('position_read_by_id')")
+
 	public ResponseEntity<RestData<PositionDTO>> getPositionByID(@PathVariable long id) throws  MethodArgumentTypeMismatchException{
+
+
 		Position position = positionServiceImpl.findById(id);
 		if(position == null)
 			throw new NotFoundException("Id invalid");
@@ -62,7 +65,9 @@ public class PositionController {
 	
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('position_delete_by_id')")
+
     public ResponseEntity<RestData<Void>> deletePosition(@PathVariable Long id) throws  MethodArgumentTypeMismatchException {
+
 		Position position = positionServiceImpl.findById(id);
 		if(position == null)
 			throw new NotFoundException("Id invalid");
@@ -90,7 +95,9 @@ public class PositionController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('position_update_by_id')")
+
     public ResponseEntity<RestData<PositionDTO>> updatePosition(@PathVariable Long id, @RequestBody PositionRequestDTO request) throws MethodArgumentTypeMismatchException {
+
 
     	Position position = positionServiceImpl.findById(id);
 		if(position == null)
