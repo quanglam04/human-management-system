@@ -33,8 +33,8 @@ public class NewUserRequest {
 	
 	@NotBlank(message = ErrorMessage.INVALID_NOT_BLANK_FIELD)
 	@Pattern(
-		    regexp = "EMPLOYER|MANAGER|ADMIN",
-		    message = "Role phải là 1 trong số EMPLOYER, MANAGER, or ADMIN"
+		    regexp = "EMPLOYEE|MANAGER|ADMIN",
+		    message = "Role phải là 1 trong số EMPLOYEE, MANAGER, or ADMIN"
 		)
 	private String role;
 }

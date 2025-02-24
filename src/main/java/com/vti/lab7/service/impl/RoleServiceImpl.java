@@ -34,7 +34,7 @@ public class RoleServiceImpl implements RoleService {
 			Role role2 = new Role("MANAGER", "");
 			roleRepository.save(role2);
 
-			Role role3 = new Role("EMPLOYER", "");
+			Role role3 = new Role("EMPLOYEE", "");
 			roleRepository.save(role3);
 		}
 

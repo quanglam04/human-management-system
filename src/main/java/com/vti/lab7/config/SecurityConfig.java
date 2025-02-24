@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -26,6 +27,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.vti.lab7.config.jwt.JwtAuthenticationFilter;
 import com.vti.lab7.exception.AuthExceptionHandler;
 import com.vti.lab7.service.CustomeUserDetailService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +47,8 @@ public class SecurityConfig {
 	JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	AuthExceptionHandler authExceptionHandler;
+	
+	LogoutHandler customLogoutHandler;
 
 	@Bean
 	PasswordEncoder passwordEncoder() {
@@ -72,7 +77,16 @@ public class SecurityConfig {
 				.authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(authExceptionHandler)
-						.accessDeniedHandler(authExceptionHandler));
+						.accessDeniedHandler(authExceptionHandler))
+				.logout(logout -> logout
+			            .logoutUrl("/api/v1/users/logout")
+			            .addLogoutHandler(customLogoutHandler) // Gọi custom logout handler
+			            .logoutSuccessHandler((request, response, authentication) -> {
+			                response.setStatus(HttpServletResponse.SC_OK);
+			                response.getWriter().write("Logged out successfully");
+			                response.getWriter().flush();
+			            })
+			        );;
 		return http.build();
 	}
 

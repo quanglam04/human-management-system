@@ -25,6 +25,8 @@ import com.vti.lab7.dto.request.NewUserRequest;
 import com.vti.lab7.dto.request.UpdateUserRequest;
 import com.vti.lab7.dto.request.UserRequest;
 import com.vti.lab7.dto.response.UserResponse;
+import com.vti.lab7.exception.custom.ForbiddenException;
+import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Department;
 import com.vti.lab7.model.User;
 import com.vti.lab7.dto.response.LoginResponseDto;
@@ -36,6 +38,8 @@ import com.vti.lab7.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+
+import static com.vti.lab7.constant.RoleConstants.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -51,9 +55,20 @@ public class UserController {
 		RestData<?> restData = new RestData<>(200, null, "Login success", responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
+	
+	@GetMapping("/me")
+	public ResponseEntity<RestData<?>> getMe(Authentication authentication) {
+		long userId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
+		UserRequest userRequest = new UserRequest();
+		userRequest.setUserId(userId);
+		UserResponse userResponse = userService.getUserById(userRequest);
+		RestData<?> restData = new RestData<>(200, null, "Thông tin của bạn", userResponse);
+		return ResponseEntity.ok().body(restData);
+		
+	}
 
 	@GetMapping
-	@PreAuthorize("hasAuthority('get_all_users') or hasAuthority('get_department_users')")
+	@PreAuthorize("hasAuthority('get_all_users')")
 	public ResponseEntity<RestData<?>> getUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -62,6 +77,10 @@ public class UserController {
             @RequestParam(defaultValue = "userId") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDirection,
             Authentication authentication) {
+		
+		long userId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
+		User user = userService.getUserClassById(userId);
+		String role = user.getRole().getRoleName();
 
         UserRequest userRequest = new UserRequest();
         userRequest.setPage(page);
@@ -71,100 +90,114 @@ public class UserController {
         userRequest.setSortBy(sortBy);
         userRequest.setSortDirection(sortDirection);
         RestData<?> restData = null;
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        if (authorities.stream().anyMatch(auth -> auth.getAuthority().equals("get_all_users"))) {
-    		restData = new RestData<>(200, null, "Danh sach toan bo users", userService.getUsers(userRequest));
-    	}
-        else if (authorities.stream().anyMatch(auth -> auth.getAuthority().equals("get_department_users"))){
-    		long userId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
-    		System.out.println(userId);
-    		User user = userService.getUserClassById(userId);
-    		long departmentId = (user.getEmployee()) != null ? 
-    				user.getEmployee().getDepartment().getDepartmentId()
-    				: -1;
-    		if(departmentId == -1) {
-    			restData = new RestData<>(404, "Not Found" , ErrorMessage.ERR_RESOURCE_NOT_FOUND, null);
-    			return ResponseEntity.status(404).body(restData);
-    		}
-    		else restData = new RestData<>(200, null, "Danh sach users", userService.getUsersOfDepartment(userRequest, departmentId));
-    	}
-        
-        
+		
+		switch(role) {
+			case "ADMIN":
+				restData = new RestData<>(200, null, "Danh sach toan bo users", userService.getUsers(userRequest));
+				break;
+			case "MANAGER":
+				long departmentId = (user.getEmployee()) != null 
+						? user.getEmployee().getDepartment().getDepartmentId()
+	    				: -1;
+	    		if(departmentId == -1) {
+	    			restData = new RestData<>(200, null, "Bạn chưa là manager của department nào", null);
+	    			return ResponseEntity.ok().body(restData);
+	    		}
+	    		else restData = new RestData<>(200, null, "Danh sach users", userService.getUsersOfDepartment(userRequest, departmentId));
+	    		
+	    		break;
+			}
         return ResponseEntity.ok().body(restData);
     }
 	
 	@GetMapping("/{userId}")
-	@PreAuthorize("hasAuthority('get_user_by_id') or hasAuthority('get_department_user_by_id') or hasAuthority('get_own_info')")
+	@PreAuthorize("hasAuthority('get_user_by_id')")
 	public ResponseEntity<RestData<?>> getUserById(
 			@PathVariable long userId,
 			Authentication authentication
 			) {
 		UserRequest userRequest = new UserRequest();
 		userRequest.setUserId(userId);
-		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 		UserResponse userResponse = null;
-		if (authorities.stream().anyMatch(auth -> auth.getAuthority().equals("get_user_by_id"))) {
-			userResponse = userService.getUserById(userRequest);
-		} 
-		else if (authorities.stream().anyMatch(auth -> auth.getAuthority().equals("get_department_user_by_id"))) {
-			User user = userService.getUserClassById(userId);
-			User userCurrent = userService.getUserClassById(((CustomUserDetails)authentication.getPrincipal()).getUserId());
-			if(user.getEmployee() == null || userCurrent.getEmployee() == null) userResponse = null;
-			else {
-				if (user.getEmployee().getDepartment().getDepartmentId()
-						== userCurrent.getEmployee().getDepartment().getDepartmentId()) {
-					userResponse = userService.getUserById(userRequest);
+		
+		long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
+		User user = userService.getUserClassById(userId);
+		User userCurrent = userService.getUserClassById(userCurrentId);
+		String role = userCurrent.getRole().getRoleName();
+
+		switch(role) {
+			case "ADMIN":
+				userResponse = userService.getUserById(userRequest);
+				break;
+				
+			case "MANAGER":
+				if(user.getEmployee() == null || userCurrent.getEmployee() == null) userResponse = null;
+				else {
+					if (user.getEmployee().getDepartment().getDepartmentId()
+							== userCurrent.getEmployee().getDepartment().getDepartmentId()) {
+						userResponse = userService.getUserById(userRequest);
+					}
 				}
-			}
+				break;
+				
+			case "EMPLOYEE":
+				if(userId != userCurrentId) userResponse = null;
+				else userResponse = userService.getUserById(userRequest);
+				break;
+				
 		}
-		else if (authorities.stream().anyMatch(auth -> auth.getAuthority().equals("get_own_info"))) {
-			long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
-			if(userId != userCurrentId) userResponse = null;
-			else userResponse = userService.getUserById(userRequest);
-		}
-//		userResponse.setEmployee(employeeService.getEmployeeByUserId(userId));
+
 		RestData<?> restData = new RestData<>(404, "Not Found", ErrorMessage.ERR_RESOURCE_NOT_FOUND, null);
-		if(userResponse != null)
+		if(userResponse != null) 
 			restData = new RestData<>(200, null, "Thong tin cua user id: " + String.valueOf(userId), userResponse);
-		else {
-			return ResponseEntity.status(404).body(restData);
-		}
+		else return ResponseEntity.status(404).body(restData);
+		
 		return ResponseEntity.ok().body(restData);
 	}
+	
 	@PostMapping
-	@PreAuthorize("hasAuthority('create_user_any_role') or hasAuthority('create_employee_in_department')")
+	@PreAuthorize("hasAuthority('create_user_any_role')")
 	public ResponseEntity<RestData<?>> postNewUser(
 			@Valid @RequestBody NewUserRequest userRequest,
 			Authentication authentication
 			) {
-		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+		long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
+		User userCurrent = userService.getUserClassById(userCurrentId);
+		String role = userCurrent.getRole().getRoleName();
+		
 		UserResponse userResponse = null;
 		RestData<?> restData = null;
+
 		if(userService.getUserClassByUserName(userRequest.getUsername()) != null) {
 			restData = new RestData<>(400, "Bad Request", "Đã tồn tại username này", null);
 			return ResponseEntity.status(400).body(restData);
 		}
 		
-		if(authorities.stream().anyMatch(auth -> auth.getAuthority().equals("create_user_any_role"))) {
-			userResponse = userService.postNewUser(userRequest);
-		} 
-		else if(authorities.stream().anyMatch(auth -> auth.getAuthority().equals("create_employee_in_department"))) {
-			long userId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
-			User user = userService.getUserClassById(userId);
-			Department department = user.getEmployee() != null ? user.getEmployee().getDepartment() : null;
-			if(department == null) {
-				restData = new RestData<>(400, "Bad Request", "Không tìm thấy department của manager", null);
-				return ResponseEntity.status(400).body(restData);
-			}
-			else userResponse = userService.postNewUserEmployer(userRequest, department);
+		switch(role) {
+			case "ADMIN":
+				userResponse = userService.postNewUser(userRequest);
+				break;
+				
+			case "MANAGER":
+				Department department = userCurrent.getEmployee() != null ? userCurrent.getEmployee().getDepartment() : null;
+				if(department == null) {
+					restData = new RestData<>(400, "Bad Request", "Bạn chưa là manager của department nào", null);
+					return ResponseEntity.status(400).body(restData);
+				}
+				else userResponse = userService.postNewUserEmployer(userRequest, department);
+			
 		}
-		restData = new RestData<>(400, "Bad Request", "Tạo user mới thất bại", null);
+		
+		
+		restData = new RestData<>(500, "Có lỗi xảy ra, vui lòng thử lại sau", "Tạo user mới thất bại", null);
 		if(userResponse != null) restData = new RestData<>(200, null, "User "+userRequest.getUsername()+" duoc tao thanh cong" , userResponse);
+		else return ResponseEntity.status(500).body(restData);
+		
 		return ResponseEntity.ok().body(restData);
 	}
 	
 	@PutMapping("/{userId}")
-	@PreAuthorize("hasAuthority('update_any_user') or hasAuthority('update_department_user') or hasAuthority('update_own_info')")
+	@PreAuthorize("hasAuthority('update_any_user')")
 	public ResponseEntity<RestData<?>> putUserById(
 			@PathVariable long userId,
 			@Valid @RequestBody UpdateUserRequest userRequest,
@@ -174,31 +207,46 @@ public class UserController {
 		UserDTO userResponse = null;
 		RestData<?> restData = null;
 		long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
+		User userCurrent = userService.getUserClassById(userCurrentId);
+		String role = userCurrent.getRole().getRoleName();
 		
-		if(authorities.stream().anyMatch(auth -> auth.getAuthority().equals("update_any_user"))) {
-			userResponse = userService.updateUser(userRequest, userId);
+		User user = new User();
+		switch(role) {
+			case "ADMIN":
+				user = userService.getUserClassById(userId);
+				if(user == null) throw new NotFoundException("Không tìm thấy user", null);
+				userResponse = userService.updateUser(userRequest, user);
+				break;
+				
+			case "MANAGER":
+				Department department = userCurrent.getEmployee() != null ? userCurrent.getEmployee().getDepartment() : null;
+				if(department == null) {
+					restData = new RestData<>(400, "Bad Request", "Bạn chưa là manager của department nào", null);
+					return ResponseEntity.status(400).body(restData);
+				}
+				
+				user = userService.getUserClassById(userId);
+				if(user == null) throw new NotFoundException("Không tìm thấy user", null);
+				if(user.getEmployee() == null || user.getEmployee().getDepartment().getDepartmentId() != department.getDepartmentId()) {
+					throw new ForbiddenException("Không thể truy cập vào user này");
+				}
+				userResponse = userService.updateUserDepartment(userRequest, user, department);
+				break;
+				
+			case "EMPLOYEE":
+				if(userId != userCurrentId) {
+					throw new ForbiddenException("Bạn không có quyền cập nhật user khác");
+				}
+				userRequest.setRole(null);
+				userResponse = userService.updateUser(userRequest, user);
+				break;
 		}
-		else if(authorities.stream().anyMatch(auth -> auth.getAuthority().equals("update_department_user"))) {
-			User userCurrent = userService.getUserClassById(userCurrentId);
-			Department department = userCurrent.getEmployee() != null ? userCurrent.getEmployee().getDepartment() : null;
-			if(department == null) {
-				restData = new RestData<>(400, "Bad Request", "Không tìm thấy department của manager", null);
-				return ResponseEntity.status(400).body(restData);
-			}
-			
-			userResponse = userService.updateUserDepartment(userRequest, userId, department);
-			
-		}
-		else if(authorities.stream().anyMatch(auth -> auth.getAuthority().equals("update_own_info"))) {
-			if(userId != userCurrentId) {
-				restData = new RestData<>(400, "Bad Request", "Bạn không có quyền cập nhật user khác", null);
-				return ResponseEntity.status(400).body(restData);
-			}
-			userRequest.setRole(null);
-			userResponse = userService.updateUser(userRequest, userId);
-		}
-		restData = new RestData<>(400, "Bad Request", "Cập nhật user id: " + userId + " thất bại", null);
+		
+
+		restData = new RestData<>(500, "Có lỗi xảy ra, vui lòng thử lại sau", "Cập nhật user id: " + userId + " thất bại", null);
 		if(userResponse != null) restData = new RestData<>(200, null, "User id: "+ userId +" cập nhật thành công" , userResponse);
+		else return ResponseEntity.status(500).body(restData);
+		
 		return ResponseEntity.ok().body(restData);
 	}
 	
