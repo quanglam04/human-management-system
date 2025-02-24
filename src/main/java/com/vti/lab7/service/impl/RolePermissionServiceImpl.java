@@ -36,7 +36,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	public void init() {
 		if (rolePermissionRepository.count() == 0) {
 
-			Role admin = roleRepository.findByRoleName("ADMIN").get();
+			Role admin = roleRepository.findByRoleName("ADMIN").orElseThrow(() -> new RuntimeException("User not found"));
 			List<Permission> adminPermissions = permissionRepository.findAll();
 
 			for (Permission permission : adminPermissions) {
@@ -44,7 +44,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 						new RolePermissionId(admin.getRoleId(), permission.getPermissionId()), admin, permission));
 			}
 
-			Role manager = roleRepository.findByRoleName("ADMIN").get();
+			Role manager = roleRepository.findByRoleName("ADMIN").orElseThrow(() -> new RuntimeException("User not found"));
 			List<Permission> managerPermissions = permissionRepository
 					.findByPermissionNameIn(List.of("employee.read", "employee.create", "employee.update",
 							"employee.delete", "employee.department.read", "employee.position.read"));

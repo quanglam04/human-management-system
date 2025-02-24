@@ -41,24 +41,26 @@ public class EmployeeServiceImpl implements EmployeeService {
 	private final DepartmentRepository departmentRepository;
 
 	private final PositionRepository positionRepository;
+	
+	private final UserServiceImpl userServiceImpl;
 
 	private Employee getEntity(long id) {
 		return employeeRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException(ErrorMessage.Employee.ERR_NOT_FOUND_ID, id));
 	}
-
-	private User getCurrentUser() {
-		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-		return userRepository.findByUsername(currentUsername)
-				.orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME, currentUsername));
+	@Override 
+	public List<Employee> fetchAllEmployeeWithNoSpec(){
+		return employeeRepository.findAll();
 	}
+
+	
 
 	@Override
 	public PaginationResponseDto<EmployeeDTO> getAllEmployees(String firstName, String lastName, String phoneNumber,
 			String status, Pageable pageable) {
 
 		// Lấy thông tin người dùng hiện tại
-		User currentUser = getCurrentUser();
+		User currentUser = userServiceImpl.getCurrentUser();
 		String roleName = currentUser.getRole().getRoleName();
 
 		// Chỉ cho phép admin và manager truy cập
@@ -103,7 +105,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	@Override
 	public EmployeeDTO getEmployeeById(Long id) {
 		// Lấy thông tin người dùng hiện tại
-		User currentUser = getCurrentUser();
+		User currentUser = userServiceImpl.getCurrentUser();
 		String roleName = currentUser.getRole().getRoleName();
 
 		// Admin có thể xem thông tin của toàn bộ id
@@ -137,7 +139,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	@Override
 	public EmployeeDTO createEmployee(EmployeeDTO requestDTO) {
 		// Lấy thông tin người dùng hiện tại
-		User currentUser = getCurrentUser();
+		User currentUser = userServiceImpl.getCurrentUser();
 		String roleName = currentUser.getRole().getRoleName();
 
 		// Chỉ cho phép admin và manager truy cập
@@ -181,7 +183,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	@Override
 	public EmployeeDTO updateEmployee(Long id, EmployeeDTO requestDTO) {
 		// Lấy thông tin người dùng hiện tại
-		User currentUser = getCurrentUser();
+		User currentUser = userServiceImpl.getCurrentUser();
 		String roleName = currentUser.getRole().getRoleName();
 
 		Employee existingEmployee = getEntity(id);

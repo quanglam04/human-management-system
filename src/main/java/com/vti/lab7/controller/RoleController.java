@@ -47,8 +47,7 @@ public class RoleController {
 	}
 
 	@GetMapping("/{id}")
-	@PreAuthorize("hasAuthority('role_read_role_by_iD')")
-
+	@PreAuthorize("hasAuthority('role_read_role_by_id')")
 	public ResponseEntity<RestData<?>> getRoleById(@PathVariable long id) throws MethodArgumentTypeMismatchException{
 
 		Role role = roleServiceImpl.findById(id);
@@ -64,7 +63,6 @@ public class RoleController {
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('role_delete_role_by_id')")
-
 	public ResponseEntity<String> deleteRole(@PathVariable long id) throws MethodArgumentTypeMismatchException{
 
 		Role role = roleServiceImpl.findById(id);
@@ -124,7 +122,7 @@ public class RoleController {
 	}
 	
 	@GetMapping("/{roleId}/permissions")
-	@PreAuthorize("hasAuthority('get_permissions_by_role_id')")
+	@PreAuthorize("hasAuthority('role_read_all')")
 	public ResponseEntity<List<Permission>> getListRolesByPermissionId(@PathVariable Long roleId) {
 		List<Permission> permissions = roleServiceImpl.findPermissionsByRoleId(roleId);
 		if (permissions.isEmpty()) {

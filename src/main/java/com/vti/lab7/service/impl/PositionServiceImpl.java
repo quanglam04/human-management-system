@@ -26,7 +26,7 @@ public class PositionServiceImpl implements PositionService{
 	public List<Position> findAll(){
 		return positionRepository.findAll();
 	}
-
+	
 	public void deleteById(long id) {
 		Optional<Position> positionOption = positionRepository.findById(id);
 		if(positionOption.isPresent())

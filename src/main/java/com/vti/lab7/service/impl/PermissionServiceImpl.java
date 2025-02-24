@@ -35,6 +35,7 @@ public class PermissionServiceImpl implements PermissionService {
             "get_own_info",
             "get_user_by_id", 
             "get_department_user_by_id", 
+            
             "create_user_any_role", 
             "create_employee_in_department",
             "update_any_user", 
@@ -47,12 +48,14 @@ public class PermissionServiceImpl implements PermissionService {
             "delete_departments", 
             "get_all_role_permissions",
             "delete_any_user",
+            
             "employee_read", 
             "employee_create", 
             "employee_update", 
             "employee_delete", 
             "employee_department_read",
             "employee_position_read",
+            
             "role_read_all",
             "role_read_role_by_id",
             "role_create",
