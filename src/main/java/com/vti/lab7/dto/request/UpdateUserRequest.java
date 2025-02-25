@@ -25,7 +25,7 @@ public class UpdateUserRequest {
     private String email;
 	
 	@Pattern(
-		    regexp = "EMPLOYER|MANAGER|ADMIN",
+		    regexp = "EMPLOYEE|MANAGER|ADMIN",
 		    message = "Role phải là 1 trong số EMPLOYER, MANAGER, or ADMIN"
 		)
 	private String role;

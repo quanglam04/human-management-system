@@ -17,6 +17,7 @@ import com.vti.lab7.dto.response.LoginResponseDto;
 import com.vti.lab7.dto.response.PaginationResponseDto;
 import com.vti.lab7.dto.response.UserDTO;
 import com.vti.lab7.dto.response.UserResponse;
+import com.vti.lab7.exception.custom.ForbiddenException;
 import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Department;
 import com.vti.lab7.model.Employee;
@@ -29,6 +30,7 @@ import com.vti.lab7.repository.RoleRepository;
 import com.vti.lab7.repository.UserRepository;
 import com.vti.lab7.service.EmployeeService;
 import com.vti.lab7.service.UserService;
+import com.vti.lab7.specification.UserSpecification;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -46,6 +48,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -53,6 +56,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import static com.vti.lab7.constant.RoleConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -67,38 +71,27 @@ public class UserServiceImpl implements UserService {
 
 	public void init() {
 		if (userRepository.count() == 0) {
-			// Tạo user Admin
-			User adminUser = new User();
-			adminUser.setUsername("hiep");
-			adminUser.setPassword(passwordEncoder.encode("1234"));
-			adminUser.setEmail("hiep@example.com");
-			adminUser.setRole(roleRepository.findByRoleName(RoleConstants.ADMIN)
-					.orElseThrow(() -> new EntityNotFoundException("Không tìm thấy vai trò ADMIN")));
-			userRepository.save(adminUser);
-
-			// Tạo user Manager
-			User managerUser = new User();
-			managerUser.setUsername("hiep2");
-			managerUser.setPassword(passwordEncoder.encode("1234"));
-			managerUser.setEmail("hiep2@example.com");
-			managerUser.setRole(roleRepository.findByRoleName(RoleConstants.MANAGER)
-					.orElseThrow(() -> new EntityNotFoundException("Không tìm thấy vai trò MANAGER")));
-			userRepository.save(managerUser);
-
-			// Tạo user Employee
-			Role employeeRole = roleRepository.findByRoleName(RoleConstants.EMPLOYEE)
-					.orElseThrow(() -> new EntityNotFoundException("Không tìm thấy vai trò EMPLOYEE"));
-
-			List<User> users = IntStream.rangeClosed(1, 18).mapToObj(i -> {
-				User user = new User();
-				user.setUsername("employee" + i);
-				user.setPassword(passwordEncoder.encode("1234"));
-				user.setEmail("employee" + i + "@example.com");
-				user.setRole(employeeRole);
-				return user;
-			}).toList();
-
-			userRepository.saveAll(users);
+			User user = new User();
+			user.setUsername("hiep");
+			user.setPassword(passwordEncoder.encode("1234"));
+			user.setEmail("hiep@example.com");
+			user.setRole(roleRepository.findByRoleName("ADMIN").orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
+			userRepository.save(user);
+			User user2 = new User();
+			user2.setUsername("hiep2");
+			user2.setPassword(passwordEncoder.encode("1234"));
+			user2.setRole(roleRepository.findByRoleName("MANAGER").orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
+			userRepository.save(user2);
+			User user3 = new User();
+			user3.setUsername("hiep3");
+			user3.setPassword(passwordEncoder.encode("1234"));
+			user3.setRole(roleRepository.findByRoleName("EMPLOYEE").orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
+			userRepository.save(user3);
+			User user4 = new User();
+			user4.setUsername("hiep4");
+			user4.setPassword(passwordEncoder.encode("1234"));
+			user4.setRole(roleRepository.findByRoleName("EMPLOYEE").orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
+			userRepository.save(user4);
 		}
 	}
 
@@ -134,8 +127,11 @@ public class UserServiceImpl implements UserService {
                 request.getSize(),
                 Sort.by(Sort.Direction.fromString(request.getSortDirection()), request.getSortBy())
         );
-
-        Page<User> users = userRepository.findAllUsers(request.getUsername(), request.getEmail(), pageable);
+		
+		Specification<User> spec = Specification
+				.where(UserSpecification.hasUsername(request.getUsername()))
+				.and(UserSpecification.hasEmail(request.getEmail()));
+        Page<User> users = userRepository.findAll(spec, pageable);
 
         return users.map(user -> new UserDTO(user));
 	}
@@ -147,7 +143,11 @@ public class UserServiceImpl implements UserService {
                 Sort.by(Sort.Direction.fromString(request.getSortDirection()), request.getSortBy())
         );
 
-        Page<User> users = userRepository.findUsersOfDepartment(request.getUsername(), request.getEmail(), departmentId, pageable);
+		Specification<User> spec = Specification
+				.where(UserSpecification.hasUsername(request.getUsername()))
+				.and(UserSpecification.hasEmail(request.getEmail()))
+				.and(UserSpecification.belongsToDepartment(departmentId));
+		Page<User> users = userRepository.findAll(spec, pageable);
 
         return users.map(user -> new UserDTO(user));
 	}
@@ -176,7 +176,7 @@ public class UserServiceImpl implements UserService {
 		user.setUsername(request.getUsername());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setEmail(request.getEmail());
-		user.setRole(roleRepository.findByRoleName("EMPLOYER").orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
+		user.setRole(roleRepository.findByRoleName(EMPLOYEE).orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
 		
 		Employee em = new Employee();
 		em.setUser(user);
@@ -192,7 +192,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public User getUserClassById(long userId) {
-		return userRepository.findByUserId(userId).orElse(new User());
+		return userRepository.findByUserId(userId).orElse(null);
 	}
 
 	@Override
@@ -201,8 +201,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDTO updateUser(@Valid UpdateUserRequest userRequest, long userId) {
-		User user = userRepository.findByUserId(userId).orElseThrow(() -> new EntityNotFoundException("Không tồn tại user"));
+	public UserDTO updateUser(@Valid UpdateUserRequest userRequest, User user) {
 
 	    if (userRequest.getEmail() != null && !userRequest.getEmail().isBlank()) {
 	        user.setEmail(userRequest.getEmail());
@@ -221,13 +220,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDTO updateUserDepartment(@Valid UpdateUserRequest userRequest, long userId, Department department) {
-		User user = userRepository.findByUserId(userId).orElseThrow(() -> new EntityNotFoundException("Không tồn tại user"));
-		
-		if(user.getEmployee() == null || user.getEmployee().getDepartment().getDepartmentId() != department.getDepartmentId()) {
-			throw new InvalidDataAccessResourceUsageException("Không thể truy cập vào user này");
-		}
-		
+	public UserDTO updateUserDepartment(@Valid UpdateUserRequest userRequest, User user, Department department) {
 	    if (userRequest.getEmail() != null && !userRequest.getEmail().isBlank()) {
 	        user.setEmail(userRequest.getEmail());
 	    }
@@ -237,7 +230,6 @@ public class UserServiceImpl implements UserService {
 	                
 	        user.setRole(newRole);
 	    }
-
 	    
 	    userRepository.save(user);
 	    

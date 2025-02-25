@@ -22,8 +22,8 @@ public interface UserService {
 	User getUserClassByUserName(String username);
 	UserResponse postNewUser(@Valid NewUserRequest userRequest);
 	UserResponse postNewUserEmployer(@Valid NewUserRequest userRequest, Department department);
-	UserDTO updateUser(@Valid UpdateUserRequest userRequest, long userId);
-	UserDTO updateUserDepartment(@Valid UpdateUserRequest userRequest, long userId, Department department);
+	UserDTO updateUser(@Valid UpdateUserRequest userRequest, User user);
+	UserDTO updateUserDepartment(@Valid UpdateUserRequest userRequest, User user, Department department);
 	void deleteUser(long userId);
 	public LoginResponseDto login(LoginRequestDto request);
 
