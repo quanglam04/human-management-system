@@ -79,8 +79,9 @@ public class UserController {
             Authentication authentication) {
 		
 		long userId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
-		User user = userService.getUserClassById(userId);
-		String role = user.getRole().getRoleName();
+		String role = ((CustomUserDetails)authentication.getPrincipal()).getRoleName();
+//		User user = userService.getUserClassById(userId);
+//		String role = user.getRole().getRoleName();
 
         UserRequest userRequest = new UserRequest();
         userRequest.setPage(page);
@@ -96,6 +97,7 @@ public class UserController {
 				restData = new RestData<>(200, null, "Danh sach toan bo users", userService.getUsers(userRequest));
 				break;
 			case "MANAGER":
+				User user = userService.getUserClassById(userId);
 				long departmentId = (user.getEmployee()) != null 
 						? user.getEmployee().getDepartment().getDepartmentId()
 	    				: -1;
@@ -103,7 +105,7 @@ public class UserController {
 	    			restData = new RestData<>(200, null, "Bạn chưa là manager của department nào", null);
 	    			return ResponseEntity.ok().body(restData);
 	    		}
-	    		else restData = new RestData<>(200, null, "Danh sach users", userService.getUsersOfDepartment(userRequest, departmentId));
+	    		else restData = new RestData<>(200, null, "Danh sach users của department " + user.getEmployee().getDepartment().getDepartmentName(), userService.getUsersOfDepartment(userRequest, departmentId));
 	    		
 	    		break;
 			}
@@ -121,9 +123,10 @@ public class UserController {
 		UserResponse userResponse = null;
 		
 		long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
+		String role = ((CustomUserDetails)authentication.getPrincipal()).getRoleName();
 		User user = userService.getUserClassById(userId);
 		User userCurrent = userService.getUserClassById(userCurrentId);
-		String role = userCurrent.getRole().getRoleName();
+//		String role = userCurrent.getRole().getRoleName();
 
 		switch(role) {
 			case "ADMIN":
@@ -162,8 +165,9 @@ public class UserController {
 			Authentication authentication
 			) {
 		long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
-		User userCurrent = userService.getUserClassById(userCurrentId);
-		String role = userCurrent.getRole().getRoleName();
+		String role = ((CustomUserDetails)authentication.getPrincipal()).getRoleName();
+//		User userCurrent = userService.getUserClassById(userCurrentId);
+//		String role = userCurrent.getRole().getRoleName();
 		
 		UserResponse userResponse = null;
 		RestData<?> restData = null;
@@ -179,6 +183,7 @@ public class UserController {
 				break;
 				
 			case "MANAGER":
+				User userCurrent = userService.getUserClassById(userCurrentId);
 				Department department = userCurrent.getEmployee() != null ? userCurrent.getEmployee().getDepartment() : null;
 				if(department == null) {
 					restData = new RestData<>(400, "Bad Request", "Bạn chưa là manager của department nào", null);
@@ -203,12 +208,13 @@ public class UserController {
 			@Valid @RequestBody UpdateUserRequest userRequest,
 			Authentication authentication
 			) {
-		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 		UserDTO userResponse = null;
 		RestData<?> restData = null;
+		
 		long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
-		User userCurrent = userService.getUserClassById(userCurrentId);
-		String role = userCurrent.getRole().getRoleName();
+		String role = ((CustomUserDetails)authentication.getPrincipal()).getRoleName();
+//		User userCurrent = userService.getUserClassById(userCurrentId);
+//		String role = userCurrent.getRole().getRoleName();
 		
 		User user = new User();
 		switch(role) {
@@ -219,6 +225,7 @@ public class UserController {
 				break;
 				
 			case "MANAGER":
+				User userCurrent = userService.getUserClassById(userCurrentId);
 				Department department = userCurrent.getEmployee() != null ? userCurrent.getEmployee().getDepartment() : null;
 				if(department == null) {
 					restData = new RestData<>(400, "Bad Request", "Bạn chưa là manager của department nào", null);
