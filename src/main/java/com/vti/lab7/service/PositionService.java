@@ -5,6 +5,7 @@ import java.util.List;
 import com.vti.lab7.model.Position;
 
 public interface PositionService {
+	void init();
 	Position findById(long id);
 	List<Position> findAll();
 	void deleteById(long id);

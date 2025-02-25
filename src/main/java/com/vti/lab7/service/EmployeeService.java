@@ -7,9 +7,10 @@ import org.springframework.data.domain.Pageable;
 import com.vti.lab7.config.CustomUserDetails;
 import com.vti.lab7.dto.EmployeeDTO;
 import com.vti.lab7.dto.response.PaginationResponseDto;
-import com.vti.lab7.model.Employee;
 
 public interface EmployeeService {
+	
+	void init();
 
 	PaginationResponseDto<EmployeeDTO> getAllEmployees(String firstName, String lastName, String phoneNumber,
 			String status, Pageable pageable, CustomUserDetails currentUser);
