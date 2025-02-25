@@ -48,10 +48,15 @@ public class ErrorMessage {
 
 	public static class Department {
 		public static final String ERR_NOT_FOUND_ID = "error.department.not.found.id";
+		public static final String ERR_DUPLICATE_NAME="error.department.name.exists";
 	}
 
 	public static class Permission {
 		public static final String ERR_NOT_FOUND_ID = "error.permission.not.found.id";
 		public static final String ERR_DUPLICATE_NAME = "error.permission.duplicate.username.email";
+	}
+	public static class RolePermissions{
+		public static final String ERR_NOT_FOUND_ID="ole-permission not found";
+		public static final String ERR_DUPLICATE_ROLE_PERMISSION="RolePermission already exists";
 	}
 }
