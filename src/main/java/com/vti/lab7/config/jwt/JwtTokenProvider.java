@@ -32,15 +32,11 @@ public class JwtTokenProvider {
 		Map<String, Object> claim = new HashMap<>();
 		claim.put(CLAIM_TYPE, isRefreshToken ? TYPE_REFRESH : TYPE_ACCESS);
 
-		if (isRefreshToken) {
-			return Jwts.builder().setClaims(claim).setSubject(String.valueOf(userDetails.getUserId()))
-					.setIssuedAt(new Date(System.currentTimeMillis()))
-					.setExpiration(new Date(System.currentTimeMillis() + (EXPIRATION_TIME_REFRESH_TOKEN * 60L * 1000L)))
-					.signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
-		}
+		long expirationTime = isRefreshToken ? EXPIRATION_TIME_REFRESH_TOKEN : EXPIRATION_TIME_ACCESS_TOKEN;
+
 		return Jwts.builder().setClaims(claim).setSubject(String.valueOf(userDetails.getUserId()))
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + (EXPIRATION_TIME_ACCESS_TOKEN * 60L * 1000L)))
+				.setExpiration(new Date(System.currentTimeMillis() + (expirationTime * 60L * 1000L)))
 				.signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
 	}
 

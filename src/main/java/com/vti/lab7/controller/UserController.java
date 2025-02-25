@@ -2,8 +2,6 @@ package com.vti.lab7.controller;
 
 import java.util.Collection;
 
-import org.apache.catalina.connector.Response;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -30,12 +28,10 @@ import com.vti.lab7.model.User;
 import com.vti.lab7.dto.response.LoginResponseDto;
 import com.vti.lab7.dto.response.RestData;
 import com.vti.lab7.dto.response.UserDTO;
-import com.vti.lab7.service.EmployeeService;
 import com.vti.lab7.service.UserService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -43,7 +39,6 @@ import org.springframework.data.domain.Page;
 public class UserController {
 	
 	private final UserService userService;
-	private final EmployeeService employeeService;
 
 	@PostMapping("/login")
 	public ResponseEntity<RestData<?>> login(@Valid @RequestBody LoginRequestDto request) {
