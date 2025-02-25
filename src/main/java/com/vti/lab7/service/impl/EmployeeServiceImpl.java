@@ -1,7 +1,7 @@
 package com.vti.lab7.service.impl;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import com.vti.lab7.exception.custom.BadRequestException;
 import com.vti.lab7.exception.custom.ForbiddenException;
@@ -10,9 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import com.vti.lab7.config.CustomUserDetails;
 import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.dto.EmployeeDTO;
 import com.vti.lab7.dto.mapper.EmployeeMapper;
@@ -28,7 +30,6 @@ import com.vti.lab7.service.EmployeeService;
 import com.vti.lab7.specification.EmployeeSpecification;
 
 import lombok.RequiredArgsConstructor;
-import static com.vti.lab7.constant.RoleConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -47,32 +48,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 				.orElseThrow(() -> new NotFoundException(ErrorMessage.Employee.ERR_NOT_FOUND_ID, id));
 	}
 
-	private User getCurrentUser() {
-		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-		return userRepository.findByUsername(currentUsername)
-				.orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME, currentUsername));
-	}
+	private PaginationResponseDto<EmployeeDTO> fetchEmployeesByFilters(String firstName, String lastName,
+			String phoneNumber, String status, Long departmentId, Pageable pageable) {
 
-	@Override
-	public PaginationResponseDto<EmployeeDTO> getAllEmployees(String firstName, String lastName, String phoneNumber,
-			String status, Pageable pageable) {
-
-		// Lấy thông tin người dùng hiện tại
-		User currentUser = getCurrentUser();
-		String roleName = currentUser.getRole().getRoleName();
-
-		// Chỉ cho phép admin và manager truy cập
-		if (!ADMIN.equals(roleName) && !MANAGER.equals(roleName)) {
-			throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
-		}
-
-		// Kiểm tra nếu là MANAGER thì chỉ được lấy theo phòng ban hiện tại
-		Long departmentId = null;
-		if (MANAGER.equals(roleName)) {
-			departmentId = currentUser.getEmployee().getDepartment().getDepartmentId();
-		}
-
-		// Tạo truy vấn
 		Specification<Employee> spec = Specification.where(EmployeeSpecification.hasFirstName(firstName))
 				.and(EmployeeSpecification.hasLastName(lastName)).and(EmployeeSpecification.hasPhoneNumber(phoneNumber))
 				.and(EmployeeSpecification.hasStatus(status)
@@ -101,54 +79,50 @@ public class EmployeeServiceImpl implements EmployeeService {
 	}
 
 	@Override
-	public EmployeeDTO getEmployeeById(Long id) {
-		// Lấy thông tin người dùng hiện tại
-		User currentUser = getCurrentUser();
-		String roleName = currentUser.getRole().getRoleName();
+	public PaginationResponseDto<EmployeeDTO> getAllEmployees(String firstName, String lastName, String phoneNumber,
+			String status, Pageable pageable, CustomUserDetails currentUser) {
+		if (currentUser.getAuthorities().contains(new SimpleGrantedAuthority("employee_read_all"))) {
+			return fetchEmployeesByFilters(firstName, lastName, phoneNumber, status, null, pageable);
+		}
 
-		// Admin có thể xem thông tin của toàn bộ id
-		if (ADMIN.equals(roleName)) {
+		Long departmentId = departmentRepository.findDepartmentIdByUsername(currentUser.getUsername());
+		return fetchEmployeesByFilters(firstName, lastName, phoneNumber, status, departmentId, pageable);
+	}
+
+	@Override
+	public EmployeeDTO getEmployeeById(Long id, CustomUserDetails currentUser) {
+		Collection<? extends GrantedAuthority> authorities = currentUser.getAuthorities();
+
+		if (authorities.contains(new SimpleGrantedAuthority("employee_read_all"))) {
 			return EmployeeMapper.convertToDTO(getEntity(id));
 		}
 
-		// Manager được xem thông tin trong cùng phòng ban
-		if (MANAGER.equals(roleName)) {
+		if (authorities.contains(new SimpleGrantedAuthority("employee_read_department"))) {
 			Employee employee = getEntity(id);
 
-			Long managerDepartmentId = currentUser.getEmployee().getDepartment().getDepartmentId();
-			if (managerDepartmentId != employee.getDepartment().getDepartmentId()) {
+			Long departmentId = departmentRepository.findDepartmentIdByUsername(currentUser.getUsername());
+			if (departmentId != employee.getDepartment().getDepartmentId()) {
 				throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
 			}
 
 			return EmployeeMapper.convertToDTO(employee);
 		}
 
-		// Employee chỉ được xem thông tin của bản thân
-		if (EMPLOYEE.equals(roleName)) {
-			if (!id.equals(currentUser.getEmployee().getEmployeeId())) {
-				throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
-			}
-			return EmployeeMapper.convertToDTO(currentUser.getEmployee());
+		Long employeeId = employeeRepository.findEmployeeIdByUsername(currentUser.getUsername());
+		if (id != employeeId) {
+			throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
 		}
-
-		throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
+		return EmployeeMapper.convertToDTO(getEntity(id));
 	}
 
 	@Override
-	public EmployeeDTO createEmployee(EmployeeDTO requestDTO) {
-		// Lấy thông tin người dùng hiện tại
-		User currentUser = getCurrentUser();
-		String roleName = currentUser.getRole().getRoleName();
+	public EmployeeDTO createEmployee(EmployeeDTO requestDTO, CustomUserDetails currentUser) {
+		Collection<? extends GrantedAuthority> authorities = currentUser.getAuthorities();
 
-		// Chỉ cho phép admin và manager truy cập
-		if (!ADMIN.equals(roleName) && !MANAGER.equals(roleName)) {
-			throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
-		}
-
-		// MANAGER chỉ được tạo nhân viên trong phòng ban của mình
-		if (MANAGER.equals(roleName)) {
+		if (authorities.contains(new SimpleGrantedAuthority("employee_create_department"))) {
 			Long requestedDepartmentId = requestDTO.getDepartmentId();
-			Long managerDepartmentId = currentUser.getEmployee().getDepartment().getDepartmentId();
+			Long managerDepartmentId = departmentRepository.findDepartmentIdByUsername(currentUser.getUsername());
+
 			if (!managerDepartmentId.equals(requestedDepartmentId)) {
 				throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
 			}
@@ -179,31 +153,23 @@ public class EmployeeServiceImpl implements EmployeeService {
 	}
 
 	@Override
-	public EmployeeDTO updateEmployee(Long id, EmployeeDTO requestDTO) {
-		// Lấy thông tin người dùng hiện tại
-		User currentUser = getCurrentUser();
-		String roleName = currentUser.getRole().getRoleName();
+	public EmployeeDTO updateEmployee(Long id, EmployeeDTO requestDTO, CustomUserDetails currentUser) {
+		Collection<? extends GrantedAuthority> authorities = currentUser.getAuthorities();
 
 		Employee existingEmployee = getEntity(id);
 
-		switch (roleName) {
-		case ADMIN -> {
-			// ADMIN có toàn quyền, không cần kiểm tra thêm
-		}
-		case MANAGER -> {
-			// MANAGER chỉ được cập nhật nhân viên trong cùng phòng ban
-			long managerDepartmentId = currentUser.getEmployee().getDepartment().getDepartmentId();
-			if (existingEmployee.getDepartment().getDepartmentId() != managerDepartmentId) {
+		if (authorities.contains(new SimpleGrantedAuthority("employee_update_all"))) {
+
+		} else if (authorities.contains(new SimpleGrantedAuthority("employee_update_department"))) {
+			Long departmentId = departmentRepository.findDepartmentIdByUsername(currentUser.getUsername());
+			if (departmentId != existingEmployee.getDepartment().getDepartmentId()) {
 				throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
 			}
-		}
-		case EMPLOYEE -> {
-			// EMPLOYEE chỉ được cập nhật thông tin của chính mình
-			if (existingEmployee.getUser().getUserId() != currentUser.getUserId()) {
+		} else if (authorities.contains(new SimpleGrantedAuthority("employee_update_self"))) {
+			Long employeeId = employeeRepository.findEmployeeIdByUsername(currentUser.getUsername());
+			if (id != employeeId) {
 				throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
 			}
-		}
-		default -> throw new ForbiddenException(ErrorMessage.ERR_FORBIDDEN);
 		}
 
 		if (requestDTO.getUserId() != null) {
@@ -279,11 +245,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 				.toList();
 	}
 
-	
 	@Override
 	public EmployeeDTO getEmployeeByUserId(Long userId) {
 		Employee employee = employeeRepository.findByUserUserId(userId).orElse(null);
 		return employee != null ? EmployeeMapper.convertToDTO(employee) : null;
 	}
-}
 
+
+}

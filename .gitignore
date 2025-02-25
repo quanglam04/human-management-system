@@ -33,6 +33,6 @@ build/
 .vscode/
 
 application.properties
-
+bin
 
 

@@ -16,6 +16,7 @@ import com.vti.lab7.dto.response.LoginResponseDto;
 import com.vti.lab7.dto.response.PaginationResponseDto;
 import com.vti.lab7.dto.response.UserDTO;
 import com.vti.lab7.dto.response.UserResponse;
+import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Department;
 import com.vti.lab7.model.Employee;
 import com.vti.lab7.model.Position;
@@ -76,6 +77,12 @@ public class UserServiceImpl implements UserService {
 			user2.setRole(roleRepository.findByRoleName("MANAGER").orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
 			userRepository.save(user2);
 		}
+	}
+	
+	public User getCurrentUser() {
+		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+		return userRepository.findByUsername(currentUsername)
+				.orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME, currentUsername));
 	}
 	
 	public LoginResponseDto login(LoginRequestDto request) {

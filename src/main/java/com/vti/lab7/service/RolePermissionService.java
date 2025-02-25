@@ -20,8 +20,9 @@ public interface RolePermissionService {
 	public RolePermission update(RolePermission rolePermission);
 
 	public int delete(RolePermissionId rolePermissionId);
+	
+	public List<Permission> findPermissionsByRoleId(Long id);
+	
+	public List<Role> findRolesByPermissionId(Long permissionId);
 
-	List<Permission> findPermissionsByRoleId(Long id);
-
-	List<Role> findRolesByPermissionId(Long permissionId);
 }

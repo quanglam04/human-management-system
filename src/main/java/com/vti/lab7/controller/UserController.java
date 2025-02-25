@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +47,7 @@ public class UserController {
 		RestData<?> restData = new RestData<>(200, null, "Login success", responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
+	
 
 	@GetMapping
 	@PreAuthorize("hasAuthority('get_all_users') or hasAuthority('get_department_users')")
