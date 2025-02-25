@@ -26,8 +26,8 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	private final RoleRepository roleRepository;
 	private final PermissionRepository permissionRepository;
 
-	@Autowired
-	private MessageSource messageSource;
+	
+	private final MessageSource messageSource;
 
 	private String getMessage(String key) {
 		return messageSource.getMessage(key, null, "Default message", LocaleContextHolder.getLocale());
@@ -119,3 +119,4 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 		return null;
 	}
 }
+

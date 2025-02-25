@@ -37,7 +37,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
 
-	private static final String[] WHITE_LIST_URL = { "/api/v1/users/login", "/api/v1/users/refresh-token", };
+	private static final String[] WHITE_LIST_URL = { "/api/v1/users/login", "/api/v1/users/refresh-token"};
 
 	CustomeUserDetailService userDetailsService;
 

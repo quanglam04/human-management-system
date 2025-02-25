@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import com.vti.lab7.config.CustomUserDetails;
 import com.vti.lab7.dto.EmployeeDTO;
 import com.vti.lab7.dto.response.PaginationResponseDto;
+import com.vti.lab7.model.Employee;
 
 public interface EmployeeService {
 
@@ -26,5 +27,6 @@ public interface EmployeeService {
 	List<EmployeeDTO> getEmployeesByPosition(Long positionId);
 
 	EmployeeDTO getEmployeeByUserId(Long userId);
+	
 
 }
