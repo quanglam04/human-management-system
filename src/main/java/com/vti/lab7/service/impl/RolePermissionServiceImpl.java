@@ -9,6 +9,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vti.lab7.constant.RoleConstants;
+import com.vti.lab7.constant.ErrorMessage;
+import com.vti.lab7.exception.custom.ConflictException;
+import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Permission;
 import com.vti.lab7.model.Role;
 import com.vti.lab7.model.RolePermission;
@@ -30,12 +33,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	private final RoleRepository roleRepository;
 
 	private final PermissionRepository permissionRepository;
-
-	private final MessageSource messageSource;
-
-	private String getMessage(String key) {
-		return messageSource.getMessage(key, null, "Default message", LocaleContextHolder.getLocale());
-	}
 
 	private void assignPermissionsToRole(String roleName, List<Permission> permissions) {
 		Role role = roleRepository.findByRoleName(roleName)
@@ -84,7 +81,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	public List<RolePermission> findAll() {
 		List<RolePermission> rolePermissions = rolePermissionRepository.findAll();
 		if (rolePermissions.isEmpty()) {
-			throw new EntityNotFoundException(getMessage("error.rolePermission.empty"));
+			throw new NotFoundException(ErrorMessage.RolePermissions.ERR_NOT_FOUND_ID);
 		}
 		return rolePermissions;
 	}
@@ -93,7 +90,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	public Optional<RolePermission> getPermissionById(RolePermissionId rolePermissionId) {
 		return Optional.ofNullable(rolePermissionRepository
 				.findPermissionById(rolePermissionId.getPermissionId(), rolePermissionId.getRoleId())
-				.orElseThrow(() -> new EntityNotFoundException(getMessage("error.rolePermission.notfound"))));
+				.orElseThrow(() -> new NotFoundException(ErrorMessage.RolePermissions.ERR_NOT_FOUND_ID)));
 	}
 
 	@Override
@@ -101,7 +98,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 		Optional<RolePermission> existRolePermission = rolePermissionRepository
 				.findPermissionById(rolePermission.getId().getPermissionId(), rolePermission.getId().getRoleId());
 		if (!existRolePermission.isEmpty()) {
-			throw new IllegalStateException(getMessage("error.rolePermission.exists"));
+			throw new ConflictException(ErrorMessage.RolePermissions.ERR_DUPLICATE_ROLE_PERMISSION);
 		}
 		return rolePermissionRepository.save(rolePermission);
 	}
@@ -111,7 +108,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 		Optional<RolePermission> existRolePermission = rolePermissionRepository
 				.findPermissionById(rolePermission.getId().getPermissionId(), rolePermission.getId().getRoleId());
 		if (existRolePermission.isEmpty()) {
-			throw new EntityNotFoundException(getMessage("error.rolePermission.notfound"));
+			throw new NotFoundException(ErrorMessage.RolePermissions.ERR_NOT_FOUND_ID);
 		}
 		return rolePermissionRepository.save(rolePermission);
 	}
@@ -120,7 +117,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 		Optional<RolePermission> existRolePermission = rolePermissionRepository
 				.findPermissionById(rolePermissionId.getPermissionId(), rolePermissionId.getRoleId());
 		if (existRolePermission.isEmpty()) {
-			throw new EntityNotFoundException(getMessage("error.rolePermission.notfound"));
+			throw new NotFoundException(ErrorMessage.RolePermissions.ERR_NOT_FOUND_ID);
 		}
 		return rolePermissionRepository.deleteRolePermission(rolePermissionId.getPermissionId(),
 				rolePermissionId.getRoleId());
@@ -128,17 +125,5 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
 	public List<RolePermission> getPermissionsByRoleId(Long roleId) {
 		return rolePermissionRepository.findById_RoleId(roleId);
-	}
-
-	@Override
-	public List<Permission> findPermissionsByRoleId(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Role> findRolesByPermissionId(Long permissionId) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
