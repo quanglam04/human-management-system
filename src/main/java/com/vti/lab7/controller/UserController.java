@@ -2,12 +2,11 @@ package com.vti.lab7.controller;
 
 import java.util.Collection;
 
-import org.apache.catalina.connector.Response;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,12 +31,10 @@ import com.vti.lab7.model.User;
 import com.vti.lab7.dto.response.LoginResponseDto;
 import com.vti.lab7.dto.response.RestData;
 import com.vti.lab7.dto.response.UserDTO;
-import com.vti.lab7.service.EmployeeService;
 import com.vti.lab7.service.UserService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+
 
 import static com.vti.lab7.constant.RoleConstants.*;
 
@@ -47,7 +44,6 @@ import static com.vti.lab7.constant.RoleConstants.*;
 public class UserController {
 	
 	private final UserService userService;
-	private final EmployeeService employeeService;
 
 	@PostMapping("/login")
 	public ResponseEntity<RestData<?>> login(@Valid @RequestBody LoginRequestDto request) {
@@ -80,8 +76,6 @@ public class UserController {
 		
 		long userId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
 		String role = ((CustomUserDetails)authentication.getPrincipal()).getRoleName();
-//		User user = userService.getUserClassById(userId);
-//		String role = user.getRole().getRoleName();
 
         UserRequest userRequest = new UserRequest();
         userRequest.setPage(page);
@@ -126,7 +120,6 @@ public class UserController {
 		String role = ((CustomUserDetails)authentication.getPrincipal()).getRoleName();
 		User user = userService.getUserClassById(userId);
 		User userCurrent = userService.getUserClassById(userCurrentId);
-//		String role = userCurrent.getRole().getRoleName();
 
 		switch(role) {
 			case "ADMIN":
@@ -166,8 +159,6 @@ public class UserController {
 			) {
 		long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
 		String role = ((CustomUserDetails)authentication.getPrincipal()).getRoleName();
-//		User userCurrent = userService.getUserClassById(userCurrentId);
-//		String role = userCurrent.getRole().getRoleName();
 		
 		UserResponse userResponse = null;
 		RestData<?> restData = null;
@@ -193,7 +184,6 @@ public class UserController {
 			
 		}
 		
-		
 		restData = new RestData<>(500, "Có lỗi xảy ra, vui lòng thử lại sau", "Tạo user mới thất bại", null);
 		if(userResponse != null) restData = new RestData<>(200, null, "User "+userRequest.getUsername()+" duoc tao thanh cong" , userResponse);
 		else return ResponseEntity.status(500).body(restData);
@@ -213,9 +203,7 @@ public class UserController {
 		
 		long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
 		String role = ((CustomUserDetails)authentication.getPrincipal()).getRoleName();
-//		User userCurrent = userService.getUserClassById(userCurrentId);
-//		String role = userCurrent.getRole().getRoleName();
-		
+
 		User user = new User();
 		switch(role) {
 			case "ADMIN":

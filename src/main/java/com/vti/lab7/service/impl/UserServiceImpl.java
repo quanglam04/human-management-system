@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.vti.lab7.config.CustomUserDetails;
 import com.vti.lab7.config.jwt.JwtTokenProvider;
 import com.vti.lab7.constant.ErrorMessage;
+import com.vti.lab7.constant.RoleConstants;
 import com.vti.lab7.dto.EmployeeDTO;
 import com.vti.lab7.dto.request.LoginRequestDto;
 import com.vti.lab7.dto.request.NewUserRequest;
@@ -17,6 +18,7 @@ import com.vti.lab7.dto.response.PaginationResponseDto;
 import com.vti.lab7.dto.response.UserDTO;
 import com.vti.lab7.dto.response.UserResponse;
 import com.vti.lab7.exception.custom.ForbiddenException;
+import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Department;
 import com.vti.lab7.model.Employee;
 import com.vti.lab7.model.Position;
@@ -36,6 +38,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -90,6 +93,12 @@ public class UserServiceImpl implements UserService {
 			user4.setRole(roleRepository.findByRoleName("EMPLOYEE").orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
 			userRepository.save(user4);
 		}
+	}
+
+	public User getCurrentUser() {
+		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+		return userRepository.findByUsername(currentUsername)
+				.orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME, currentUsername));
 	}
 	
 	public LoginResponseDto login(LoginRequestDto request) {

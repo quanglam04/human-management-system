@@ -7,6 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+
+import com.vti.lab7.constant.RoleConstants;
+import com.vti.lab7.constant.ErrorMessage;
+import com.vti.lab7.exception.custom.ConflictException;
+import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Permission;
 import com.vti.lab7.model.Role;
 import com.vti.lab7.model.RolePermission;
@@ -22,37 +27,53 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class RolePermissionServiceImpl implements RolePermissionService {
+
 	private final RolePermissionRepository rolePermissionRepository;
+
 	private final RoleRepository roleRepository;
+
 	private final PermissionRepository permissionRepository;
 
-	@Autowired
-	private MessageSource messageSource;
+	private void assignPermissionsToRole(String roleName, List<Permission> permissions) {
+		Role role = roleRepository.findByRoleName(roleName)
+				.orElseThrow(() -> new RuntimeException("Role " + roleName + " not found!"));
 
-	private String getMessage(String key) {
-		return messageSource.getMessage(key, null, "Default message", LocaleContextHolder.getLocale());
+		List<RolePermission> rolePermissions = permissions.stream()
+				.map(permission -> new RolePermission(
+						new RolePermissionId(role.getRoleId(), permission.getPermissionId()), role, permission))
+				.toList();
+
+		rolePermissionRepository.saveAll(rolePermissions);
 	}
 
 	public void init() {
 		if (rolePermissionRepository.count() == 0) {
+			assignPermissionsToRole(RoleConstants.ADMIN, permissionRepository.findAll());
 
-			Role admin = roleRepository.findByRoleName("ADMIN").orElseThrow(() -> new RuntimeException("User not found"));
-			List<Permission> adminPermissions = permissionRepository.findAll();
+			assignPermissionsToRole(RoleConstants.MANAGER, permissionRepository.findByPermissionNameIn(List.of(
+					// Department
+					"get_all_departments", "get_department_by_id",
 
-			for (Permission permission : adminPermissions) {
-				rolePermissionRepository.save(new RolePermission(
-						new RolePermissionId(admin.getRoleId(), permission.getPermissionId()), admin, permission));
-			}
+					// Employee
+					"employee_read_department", "employee_read_self", "employee_create_department",
+					"employee_update_department", "employee_update_self",
 
-			Role manager = roleRepository.findByRoleName("ADMIN").orElseThrow(() -> new RuntimeException("User not found"));
-			List<Permission> managerPermissions = permissionRepository
-					.findByPermissionNameIn(List.of("employee.read", "employee.create", "employee.update",
-							"employee.delete", "employee.department.read", "employee.position.read"));
+					// Role
+					"role_read_all", "role_read_role_by_id", "get_role_by_permissions_id",
 
-			for (Permission permission : managerPermissions) {
-				rolePermissionRepository.save(new RolePermission(
-						new RolePermissionId(manager.getRoleId(), permission.getPermissionId()), manager, permission));
-			}
+					// Role-Permission
+					"get_all_role_permissions", "get_role_permission_by_perrmission_id",
+
+					// User
+					"get_department_users", "get_department_user_by_id", "get_own_info",
+					"create_employee_in_department", "update_department_user", "update_own_info")));
+
+			assignPermissionsToRole(RoleConstants.EMPLOYEE, permissionRepository.findByPermissionNameIn(List.of(
+					// Employee
+					"employee_read_self", "employee_update_self",
+
+					// User
+					"get_own_info", "update_own_info")));
 		}
 	}
 
@@ -60,7 +81,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	public List<RolePermission> findAll() {
 		List<RolePermission> rolePermissions = rolePermissionRepository.findAll();
 		if (rolePermissions.isEmpty()) {
-			throw new EntityNotFoundException(getMessage("error.rolePermission.empty"));
+			throw new NotFoundException(ErrorMessage.RolePermissions.ERR_NOT_FOUND_ID);
 		}
 		return rolePermissions;
 	}
@@ -69,7 +90,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 	public Optional<RolePermission> getPermissionById(RolePermissionId rolePermissionId) {
 		return Optional.ofNullable(rolePermissionRepository
 				.findPermissionById(rolePermissionId.getPermissionId(), rolePermissionId.getRoleId())
-				.orElseThrow(() -> new EntityNotFoundException(getMessage("error.rolePermission.notfound"))));
+				.orElseThrow(() -> new NotFoundException(ErrorMessage.RolePermissions.ERR_NOT_FOUND_ID)));
 	}
 
 	@Override
@@ -77,7 +98,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 		Optional<RolePermission> existRolePermission = rolePermissionRepository
 				.findPermissionById(rolePermission.getId().getPermissionId(), rolePermission.getId().getRoleId());
 		if (!existRolePermission.isEmpty()) {
-			throw new IllegalStateException(getMessage("error.rolePermission.exists"));
+			throw new ConflictException(ErrorMessage.RolePermissions.ERR_DUPLICATE_ROLE_PERMISSION);
 		}
 		return rolePermissionRepository.save(rolePermission);
 	}
@@ -87,7 +108,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 		Optional<RolePermission> existRolePermission = rolePermissionRepository
 				.findPermissionById(rolePermission.getId().getPermissionId(), rolePermission.getId().getRoleId());
 		if (existRolePermission.isEmpty()) {
-			throw new EntityNotFoundException(getMessage("error.rolePermission.notfound"));
+			throw new NotFoundException(ErrorMessage.RolePermissions.ERR_NOT_FOUND_ID);
 		}
 		return rolePermissionRepository.save(rolePermission);
 	}
@@ -96,26 +117,13 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 		Optional<RolePermission> existRolePermission = rolePermissionRepository
 				.findPermissionById(rolePermissionId.getPermissionId(), rolePermissionId.getRoleId());
 		if (existRolePermission.isEmpty()) {
-			throw new EntityNotFoundException(getMessage("error.rolePermission.notfound"));
+			throw new NotFoundException(ErrorMessage.RolePermissions.ERR_NOT_FOUND_ID);
 		}
 		return rolePermissionRepository.deleteRolePermission(rolePermissionId.getPermissionId(),
 				rolePermissionId.getRoleId());
 	}
 
-
-	 public List<RolePermission> getPermissionsByRoleId(Long roleId) {
-	        return rolePermissionRepository.findById_RoleId(roleId);
-	    }
-
-	@Override
-	public List<Permission> findPermissionsByRoleId(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Role> findRolesByPermissionId(Long permissionId) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<RolePermission> getPermissionsByRoleId(Long roleId) {
+		return rolePermissionRepository.findById_RoleId(roleId);
 	}
 }

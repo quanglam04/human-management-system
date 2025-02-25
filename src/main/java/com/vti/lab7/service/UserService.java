@@ -28,4 +28,5 @@ public interface UserService {
 	public LoginResponseDto login(LoginRequestDto request);
 
 	public void init();
+	public User getCurrentUser();
 }
