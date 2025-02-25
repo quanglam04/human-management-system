@@ -37,7 +37,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
 
-	private static final String[] WHITE_LIST_URL = { "/api/v1/users/login", "/api/v1/users/refresh-token"};
+	private static final String[] WHITE_LIST_URL = { "/api/v1/users/login", "/api/v1/users/refresh-token" };
 
 	CustomeUserDetailService userDetailsService;
 
@@ -71,8 +71,7 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-				.exceptionHandling(ex -> ex.authenticationEntryPoint(authExceptionHandler)
-						.accessDeniedHandler(authExceptionHandler));
+				.exceptionHandling(ex -> ex.authenticationEntryPoint(authExceptionHandler));
 		return http.build();
 	}
 
