@@ -6,6 +6,8 @@ import java.util.Optional;
 import com.vti.lab7.model.Department;
 
 public interface IDeparmentService {
+	
+	void init();
 
 	Optional<Department> findDepartment(Long id);
 

@@ -2,6 +2,7 @@ package com.vti.lab7.service.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -64,5 +65,20 @@ public class DepartmentService implements IDeparmentService {
 			throw new NotFoundException("error.department.notfound");
 		}
 		departmentRepository.deleteById(id);
+	}
+
+	@Override
+	public void init() {
+	  if (departmentRepository.count() == 0) {
+            // Tạo danh sách 20 phòng ban
+            List<Department> departments = IntStream.rangeClosed(1, 20).mapToObj(i -> {
+                Department department = new Department();
+                department.setDepartmentName("Department " + i);
+                department.setDescription("Description for Department " + i);
+                return department;
+            }).toList();
+
+            departmentRepository.saveAll(departments);
+        }
 	}
 }

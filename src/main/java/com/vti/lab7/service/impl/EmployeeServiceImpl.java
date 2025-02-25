@@ -1,7 +1,11 @@
 package com.vti.lab7.service.impl;
 
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import com.vti.lab7.exception.custom.BadRequestException;
 import com.vti.lab7.exception.custom.ForbiddenException;
@@ -43,6 +47,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	private final PositionRepository positionRepository;
 
+	private final Random random = new Random();
+
 	private Employee getEntity(long id) {
 		return employeeRepository.findById(id)
 				.orElseThrow(() -> new NotFoundException(ErrorMessage.Employee.ERR_NOT_FOUND_ID, id));
@@ -76,6 +82,50 @@ public class EmployeeServiceImpl implements EmployeeService {
 		responseDto.setMeta(pagingMeta);
 
 		return responseDto;
+	}
+
+	private Date generateRandomDate(int yearStart, int yearEnd) {
+		int day = random.nextInt(28) + 1;
+		int month = random.nextInt(12) + 1;
+		int year = random.nextInt(yearEnd - yearStart + 1) + yearStart;
+		return Date.valueOf(LocalDate.of(year, month, day));
+	}
+
+	@Override
+	public void init() {
+		if (employeeRepository.count() == 0) {
+			List<User> users = userRepository.findAll();
+			List<Position> positions = positionRepository.findAll();
+			List<Department> departments = departmentRepository.findAll();
+
+			if (users.isEmpty() || positions.isEmpty() || departments.isEmpty()) {
+				System.out.println("Thiếu dữ liệu User, Position hoặc Department để khởi tạo Employee.");
+				return;
+			}
+
+			String[] firstNames = { "Nguyen", "Tran", "Le", "Pham", "Hoang", "Phan", "Vu", "Vo", "Dang", "Bui" };
+			String[] lastNames = { "An", "Binh", "Cuong", "Dung", "Em", "Phong", "Quan", "Son", "Tien", "Viet" };
+
+			for (int i = 0; i < 20; i++) {
+				Employee employee = new Employee();
+
+				employee.setFirstName(firstNames[random.nextInt(firstNames.length)]);
+				employee.setLastName(lastNames[random.nextInt(lastNames.length)]);
+
+				employee.setDateOfBirth(generateRandomDate(1980, 2000));
+				employee.setPhoneNumber("09" + (10000000 + random.nextInt(90000000)));
+				employee.setAddress("Địa chỉ ngẫu nhiên " + i);
+				employee.setHireDate(generateRandomDate(2015, 2023));
+				employee.setSalary(BigDecimal.valueOf(500 + random.nextInt(5000)));
+				employee.setStatus(random.nextBoolean() ? "ACTIVE" : "INACTIVE");
+
+				employee.setUser(users.get(i));
+				employee.setPosition(positions.get(random.nextInt(positions.size())));
+				employee.setDepartment(departments.get(random.nextInt(departments.size())));
+
+				employeeRepository.save(employee);
+			}
+		}
 	}
 
 	@Override
@@ -250,6 +300,5 @@ public class EmployeeServiceImpl implements EmployeeService {
 		Employee employee = employeeRepository.findByUserUserId(userId).orElse(null);
 		return employee != null ? EmployeeMapper.convertToDTO(employee) : null;
 	}
-
 
 }

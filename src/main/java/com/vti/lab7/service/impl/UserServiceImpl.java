@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.vti.lab7.config.CustomUserDetails;
 import com.vti.lab7.config.jwt.JwtTokenProvider;
 import com.vti.lab7.constant.ErrorMessage;
+import com.vti.lab7.constant.RoleConstants;
 import com.vti.lab7.dto.EmployeeDTO;
 import com.vti.lab7.dto.request.LoginRequestDto;
 import com.vti.lab7.dto.request.NewUserRequest;
@@ -35,6 +36,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -65,20 +67,41 @@ public class UserServiceImpl implements UserService {
 
 	public void init() {
 		if (userRepository.count() == 0) {
-			User user = new User();
-			user.setUsername("hiep");
-			user.setPassword(passwordEncoder.encode("1234"));
-			user.setEmail("hiep@example.com");
-			user.setRole(roleRepository.findByRoleName("ADMIN").orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
-			userRepository.save(user);
-			User user2 = new User();
-			user2.setUsername("hiep2");
-			user2.setPassword(passwordEncoder.encode("1234"));
-			user2.setRole(roleRepository.findByRoleName("MANAGER").orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
-			userRepository.save(user2);
+			// Tạo user Admin
+			User adminUser = new User();
+			adminUser.setUsername("hiep");
+			adminUser.setPassword(passwordEncoder.encode("1234"));
+			adminUser.setEmail("hiep@example.com");
+			adminUser.setRole(roleRepository.findByRoleName(RoleConstants.ADMIN)
+					.orElseThrow(() -> new EntityNotFoundException("Không tìm thấy vai trò ADMIN")));
+			userRepository.save(adminUser);
+
+			// Tạo user Manager
+			User managerUser = new User();
+			managerUser.setUsername("hiep2");
+			managerUser.setPassword(passwordEncoder.encode("1234"));
+			managerUser.setEmail("hiep2@example.com");
+			managerUser.setRole(roleRepository.findByRoleName(RoleConstants.MANAGER)
+					.orElseThrow(() -> new EntityNotFoundException("Không tìm thấy vai trò MANAGER")));
+			userRepository.save(managerUser);
+
+			// Tạo user Employee
+			Role employeeRole = roleRepository.findByRoleName(RoleConstants.EMPLOYEE)
+					.orElseThrow(() -> new EntityNotFoundException("Không tìm thấy vai trò EMPLOYEE"));
+
+			List<User> users = IntStream.rangeClosed(1, 18).mapToObj(i -> {
+				User user = new User();
+				user.setUsername("employee" + i);
+				user.setPassword(passwordEncoder.encode("1234"));
+				user.setEmail("employee" + i + "@example.com");
+				user.setRole(employeeRole);
+				return user;
+			}).toList();
+
+			userRepository.saveAll(users);
 		}
 	}
-	
+
 	public User getCurrentUser() {
 		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 		return userRepository.findByUsername(currentUsername)

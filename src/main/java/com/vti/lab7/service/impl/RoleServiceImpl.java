@@ -6,6 +6,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+
+import com.vti.lab7.constant.RoleConstants;
 import com.vti.lab7.model.Permission;
 import com.vti.lab7.model.Role;
 import com.vti.lab7.repository.RoleRepository;
@@ -28,14 +30,17 @@ public class RoleServiceImpl implements RoleService {
 
 	public void init() {
 		if (roleRepository.count() == 0) {
-			Role role1 = new Role("ADMIN", "");
-			roleRepository.save(role1);
+			Role adminRole = new Role();
+			adminRole.setRoleName(RoleConstants.ADMIN);
+			roleRepository.save(adminRole);
 
-			Role role2 = new Role("MANAGER", "");
-			roleRepository.save(role2);
+			Role managerRole = new Role();
+			managerRole.setRoleName(RoleConstants.MANAGER);
+			roleRepository.save(managerRole);
 
-			Role role3 = new Role("EMPLOYER", "");
-			roleRepository.save(role3);
+			Role employeeRole = new Role();
+			employeeRole.setRoleName(RoleConstants.EMPLOYEE);
+			roleRepository.save(employeeRole);
 		}
 
 	}

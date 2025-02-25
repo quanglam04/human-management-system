@@ -21,70 +21,62 @@ import lombok.RequiredArgsConstructor;
 public class PermissionServiceImpl implements PermissionService {
 
 	private Map<String, String> permissionMap = Map.ofEntries(
+			// Department
+			Map.entry("get_department_by_id", "Lấy văn phòng theo ID"),
+			Map.entry("create_new_department", "Tạo văn phòng mới"),
+			Map.entry("get_all_departments", "Lấy tất cả các văn phòng ra"),
+			Map.entry("update_department", "Sửa các văn phòng cũ"),
+			Map.entry("delete_department_by_id", "Xóa các văn phòng"),
+
+			// Employee
+			Map.entry("employee_read_all", "Xem danh sách tất cả nhân viên"),
+			Map.entry("employee_read_department", "Xem danh sách nhân viên thuộc phòng ban của mình"),
+			Map.entry("employee_read_self", "Xem thông tin của chính mình"),
+			Map.entry("employee_create_all", "Tạo nhân viên mới với bất kỳ vai trò nào"),
+			Map.entry("employee_create_department", "Tạo nhân viên mới với vai trò Employee cho phòng ban của mình"),
+			Map.entry("employee_update_all", "Cập nhật thông tin của bất kỳ nhân viên nào"),
+			Map.entry("employee_update_department", "Cập nhật thông tin của nhân viên thuộc phòng ban của mình"),
+			Map.entry("employee_update_self", "Cập nhật thông tin của chính mình"),
+			Map.entry("employee_delete_all", "Xóa bất kỳ nhân viên nào"),
+			Map.entry("read_employee_by_department", "Xem danh sách nhân viên thuộc một phòng ban cụ thể"),
+			Map.entry("read_employee_by_position", "Xem danh sách nhân viên thuộc một vị trí cụ thể"),
+
+			// Permission
+			Map.entry("read_permission", "Xem danh sách và chi tiết quyền"),
+			Map.entry("create_permission", "Tạo quyền mới"), Map.entry("update_permission", "Cập nhật thông tin quyền"),
+			Map.entry("delete_permission", "Xóa quyền"),
+
+			// Position
+			Map.entry("position_delete_by_id", "Xóa một chức vụ theo ID"),
+			Map.entry("position_create", "Tạo mới một chức vụ"),
+			Map.entry("position_update_by_id", "Cập nhật thông tin của một chức vụ theo ID"),
+
+			// Role
+			Map.entry("role_read_all", "Lấy danh sách tất cả các vai trò"),
+			Map.entry("role_read_role_by_id", "Lấy thông tin vai trò theo ID"),
+			Map.entry("role_delete_role_by_id", "Xóa vai trò theo ID"), Map.entry("role_create", "Tạo mới vai trò"),
+			Map.entry("role_update_role_by_id", "Cập nhật vai trò theo ID"),
+			Map.entry("get_role_by_permissions_id", "Lấy danh sách role có quyền theo ID"),
+
+			// Role-Permission
+			Map.entry("get_all_role_permissions", "Lấy tất cả các quyền theo vai trò"),
+			Map.entry("get_role_permission_by_perrmission_id", "Lấy quyền của vai trò theo ID quyền"),
+			Map.entry("create_new_role_permission", "Tạo mới quyền cho vai trò"),
+			Map.entry("delete_role_permission", "Xóa quyền của vai trò theo ID vai trò và ID quyền"),
+
 			// User
 			Map.entry("get_all_users", "Lấy danh sách tất cả người dùng"),
 			Map.entry("get_department_users", "Lấy danh sách người dùng thuộc phòng ban của mình"),
-			Map.entry("get_own_info", "Lấy thông tin của chính mình"),
 			Map.entry("get_user_by_id", "Lấy thông tin của bất kỳ người dùng nào"),
 			Map.entry("get_department_user_by_id", "Lấy thông tin của người dùng thuộc phòng ban của mình"),
+			Map.entry("get_own_info", "Lấy thông tin của chính mình"),
 			Map.entry("create_user_any_role", "Tạo người dùng mới với bất kỳ vai trò nào"),
 			Map.entry("create_employee_in_department",
 					"Tạo người dùng mới với vai trò Employee cho phòng ban của mình"),
 			Map.entry("update_any_user", "Cập nhật thông tin của bất kỳ người dùng nào"),
 			Map.entry("update_department_user", "Cập nhật thông tin của người dùng thuộc phòng ban của mình"),
 			Map.entry("update_own_info", "Cập nhật thông tin của chính mình"),
-			Map.entry("delete_any_user", "Xóa bất kỳ người dùng nào"),
-
-			// Department
-			Map.entry("get_all_departments", "Lấy tất cả các văn phòng ra"),
-			Map.entry("create_new_departments", "Tạo văn phòng mới"),
-			Map.entry("update_departments", "Sửa các văn phòng cũ"),
-			Map.entry("delete_department_by_id", "Xóa các văn phòng"),
-			Map.entry("get_department_by_id", "Lấy văn phòng theo ID"),
-
-
-			// Role-Permission
-			Map.entry("get_all_role_permissions", "Lấy danh sách tất cả các mối quan hệ giữa vai trò và quyền"),
-			Map.entry("get_role_permission_by_permission_id",
-					"Lấy thông tin chi tiết của một mối quan hệ giữa vai trò và quyền theo ID vai trò và ID Quyền"),
-			Map.entry("create_new_role_permission", "Tạo mối quan hệ mới giữa vai trò và quyền"),
-			Map.entry("get_list_permissions_of_role", "Lấy tất cả các quyền của một vai trò"),
-			Map.entry("get_list_role_has_one_permission", "Lấy danh sách các vai trò có 1 quyền"),
-			Map.entry("delete_role_permission",
-					"Xóa một mối quan hệ giữa vai trò và quyền theo ID vai trò và ID Quyền"),
-			Map.entry("get_permissions_by_role_id", "Lấy tất cả các quyền của một vai trò cụ thể"),
-			Map.entry("get_role_by_permissions_id", "Lấy danh sách vai trò bằng ID quyền"),
-
-			// Role
-			Map.entry("role_read_all", "Lấy danh sách tất cả các vai trò"),
-			Map.entry("role_read_role_by_id", "Lấy thông tin chi tiết của 1 vai trò theo ID"),
-			Map.entry("role_delete_role_by_id", "Tạo một vai trò mới"),
-			Map.entry("role_create", "Cập nhật thông tin vai trò theo ID"),
-			Map.entry("role_update_role_by_id", "Xóa một vai trò theo ID"),
-			
-			//Position
-			Map.entry("position_delete_by_id", "Xóa một vai trò theo ID"),
-			Map.entry("position_create", "Xóa một vai trò theo ID"),
-			Map.entry("position_update_by_id", "Xóa một vai trò theo ID"),
-
-			// Employee
-			Map.entry("employee_read_all", "Xem danh sách nhân viên"),
-			Map.entry("employee_read_department", "Tạo mới nhân viên"),
-			Map.entry("employee_read_self", "Cập nhật thông tin nhân viên"),
-			Map.entry("employee_create_all", "Xóa nhân viên"),
-			Map.entry("employee_create_department", "Xem danh sách nhân viên trong phòng ban"),
-			Map.entry("employee_update_all", "Xem danh sách nhân viên theo vị trí"),
-			Map.entry("employee_update_department", "Xem danh sách nhân viên"),
-			Map.entry("employee_update_self", "Xem danh sách nhân viên"),
-			Map.entry("employee_delete_all", "Xem danh sách nhân viên"),
-			Map.entry("read_employee_by_department", "Xem danh sách nhân viên"),
-			Map.entry("read_employee_by_position", "Xem danh sách nhân viên"),
-			// Permission
-			Map.entry("read_permission", "Xem danh sách quyền"), 
-			Map.entry("create_permission", "Tạo mới quyền"),
-			Map.entry("update_permission", "Cập nhật thông tin quyền"),
-			Map.entry("delete_permission", "Xóa quyền"));
-
+			Map.entry("delete_any_user", "Xóa bất kỳ người dùng nào"));
 
 	private final PermissionRepository permissionRepository;
 

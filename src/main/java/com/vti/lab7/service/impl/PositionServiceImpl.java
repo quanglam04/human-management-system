@@ -49,7 +49,18 @@ public class PositionServiceImpl implements PositionService{
 		}
 		return null;
 	}
-	
-	
+
+	@Override
+	public void init() {
+		if(positionRepository.count() == 0) {
+			 List<String> positionNames = List.of(
+			            "Manager", "Developer", "Tester", "Designer", "Analyst",
+			            "HR", "Accountant", "Sales", "Support", "Operator"
+			        );
+			for (String name : positionNames) {
+		            positionRepository.save(new Position(name));
+		    }
+		}
+	}
 	
 }
