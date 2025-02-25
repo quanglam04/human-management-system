@@ -5,7 +5,6 @@ public class ErrorMessage {
 	public static final String ERR_RESOURCE_NOT_FOUND = "error.resource.not.found";
 	public static final String ERR_EXCEPTION_GENERAL = "error.error.general";
 	public static final String ERR_FORBIDDEN = "error.forbidden";
-	public static final String ERR_NOT_FOUND = "error.notfound";
 	public static final String ERR_NO_RESOURCE_FOUND = "error.no.resource.found";
 	public static final String ERR_NO_HANDLER_FOUND = "error.no.handler.found";
 	public static final String ERR_METHOD_NOT_SUPPORTED = "error.method.not.supported";
