@@ -1,12 +1,9 @@
 package com.vti.lab7.controller;
 
-import java.util.Collection;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +18,7 @@ import com.vti.lab7.config.CustomUserDetails;
 import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.dto.request.LoginRequestDto;
 import com.vti.lab7.dto.request.NewUserRequest;
+import com.vti.lab7.dto.request.TokenRefreshRequestDto;
 import com.vti.lab7.dto.request.UpdateUserRequest;
 import com.vti.lab7.dto.request.UserRequest;
 import com.vti.lab7.dto.response.UserResponse;
@@ -30,13 +28,16 @@ import com.vti.lab7.model.Department;
 import com.vti.lab7.model.User;
 import com.vti.lab7.dto.response.LoginResponseDto;
 import com.vti.lab7.dto.response.RestData;
+import com.vti.lab7.dto.response.TokenRefreshResponseDto;
 import com.vti.lab7.dto.response.UserDTO;
 import com.vti.lab7.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-
-import static com.vti.lab7.constant.RoleConstants.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -51,6 +52,28 @@ public class UserController {
 		RestData<?> restData = new RestData<>(200, null, "Login success", responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
+	
+	@Operation(summary = "API Logout")
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) {
+        userService.logout(request, response, authentication);
+        
+		RestData<?> restData = new RestData<>(200, null, "Logout success", true);
+		return ResponseEntity.ok().body(restData);
+    }
+
+    @Operation(summary = "API Refresh token")
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refresh(@Valid @RequestBody TokenRefreshRequestDto tokenRefreshRequestDto) {
+    	TokenRefreshResponseDto responseDto = userService.refresh(tokenRefreshRequestDto);
+    	
+    	RestData<?> restData = new RestData<>(200, null, null, responseDto);
+		return ResponseEntity.ok().body(restData);
+    }
 	
 	@GetMapping("/me")
 	public ResponseEntity<RestData<?>> getMe(Authentication authentication) {

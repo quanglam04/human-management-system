@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.dto.RoleDTO;
 import com.vti.lab7.dto.mapper.RoleMapperDTO;
 import com.vti.lab7.dto.request.RoleRequestDTO;
@@ -24,15 +26,19 @@ import com.vti.lab7.model.Role;
 import com.vti.lab7.model.Permission;
 import com.vti.lab7.service.impl.RoleServiceImpl;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/roles")
+@Tag(name = "Role Controller", description = "APIs for managing roles")
 public class RoleController {
 	private final RoleServiceImpl roleServiceImpl;
 	@GetMapping()
+	@Operation(summary = "Get all roles")
 	@PreAuthorize("hasAuthority('role_read_all')")
 	public ResponseEntity<RestData<List<RoleDTO>>> getAllRole() {
 		List<Role> roles = roleServiceImpl.findAll();
@@ -47,6 +53,7 @@ public class RoleController {
 	}
 
 	@GetMapping("/{id}")
+	@Operation(summary = "Get roles by ID")
 	@PreAuthorize("hasAuthority('role_read_role_by_id')")
 	public ResponseEntity<RestData<?>> getRoleById(@PathVariable long id) throws MethodArgumentTypeMismatchException{
 
@@ -62,17 +69,19 @@ public class RoleController {
 	}
 
 	@DeleteMapping("/{id}")
+	@Operation(summary = "Delete role by ID")
 	@PreAuthorize("hasAuthority('role_delete_role_by_id')")
 	public ResponseEntity<String> deleteRole(@PathVariable long id) throws MethodArgumentTypeMismatchException{
 
 		Role role = roleServiceImpl.findById(id);
 		if (role == null)
-			throw new NotFoundException("Id invalid");
+			throw new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND_ID,id);
 		roleServiceImpl.deleteById(id);
 		return ResponseEntity.ok("Delete role success");
 	}
 
 	@PostMapping()
+	@Operation(summary = "Create role")
 	@PreAuthorize("hasAuthority('role_create')")
 	public ResponseEntity<RestData<RoleDTO>> createRole(@Valid @RequestBody RoleRequestDTO roleRequestDTO) throws ConflictException{
 		RestData<RoleDTO> restData = new RestData<>();
@@ -81,7 +90,7 @@ public class RoleController {
 		List<String> roleNames = roleServiceImpl.findAll().stream().map(x -> x.getRoleName()).toList();
 		for(String roleName : roleNames )
 			if(roleName.toLowerCase().trim().equals(roleNameRequest.toLowerCase().trim()))
-				throw new ConflictException("error.role.name.exist",roleName );
+				throw new ConflictException(ErrorMessage.Role.ERR_NOT_EXIST_NAME,roleName );
 		role.setDescription(roleRequestDTO.getDescription());
 		role.setRoleName(roleRequestDTO.getRoleName());
 		
@@ -97,18 +106,18 @@ public class RoleController {
 	
 	@PutMapping("/{id}")
 	@PreAuthorize("hasAuthority('role_update_role_by_id')")
-
+	@Operation(summary = "Update role by ID")
 	public ResponseEntity<RestData<RoleDTO>> updateRole(@PathVariable long id, @RequestBody RoleRequestDTO roleRequestDTO) throws ConflictException {
 
 		Role role = roleServiceImpl.findById(id);
 		RestData<RoleDTO> restData = new RestData<>();
 		if(role == null)
-			throw new NotFoundException("ID invalid");
+			throw new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND_ID);
 		
 		List<String> roleNames = roleServiceImpl.findAll().stream().map(x -> x.getRoleName()).toList();
 		for(String roleName : roleNames )
 			if(roleName.toLowerCase().equals(roleRequestDTO.getRoleName().toLowerCase()))
-				throw new ConflictException("error.role.name.exist",roleName );
+				throw new ConflictException(ErrorMessage.Role.ERR_NOT_FOUND_NAME,roleName );
 		role.setDescription(roleRequestDTO.getDescription().trim());
 		role.setRoleName(roleRequestDTO.getRoleName().trim());
 		roleServiceImpl.updateRole(role);
@@ -123,6 +132,7 @@ public class RoleController {
 	
 	@GetMapping("/{roleId}/permissions")
 	@PreAuthorize("hasAuthority('role_read_all')")
+	@Operation(summary = "Get list roles by permissionID")
 	public ResponseEntity<List<Permission>> getListRolesByPermissionId(@PathVariable Long roleId) {
 		List<Permission> permissions = roleServiceImpl.findPermissionsByRoleId(roleId);
 		if (permissions.isEmpty()) {
