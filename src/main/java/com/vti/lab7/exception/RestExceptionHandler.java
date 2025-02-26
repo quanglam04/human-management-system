@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -20,6 +21,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.dto.response.ErrorResponse;
 import com.vti.lab7.exception.custom.*;
 
@@ -63,6 +65,18 @@ public class RestExceptionHandler {
 		log.error(detailMessage, exception);
 		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	@ExceptionHandler(BadCredentialsException.class)
+	public ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException exception) {
+	    String message = ErrorMessage.ERR_UNAUTHORIZED;
+	    String detailMessage = "Sai tài khoản hoặc mật khẩu";
+	    int code = 401;
+	    String moreInformation = "http://localhost:8080/api/v1/exception/401";
+
+	    ErrorResponse response = new ErrorResponse(message, detailMessage, null, code, moreInformation);
+	    return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+	}
+
 
 	// Forbidden handler
 	@ExceptionHandler(AccessDeniedException.class)
