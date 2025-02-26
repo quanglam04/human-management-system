@@ -138,10 +138,12 @@ public class UserController {
 		UserRequest userRequest = new UserRequest();
 		userRequest.setUserId(userId);
 		UserResponse userResponse = null;
+		RestData<?> restData = new RestData<>(404, "Not Found", ErrorMessage.ERR_RESOURCE_NOT_FOUND, null);
 		
 		long userCurrentId = ((CustomUserDetails)authentication.getPrincipal()).getUserId();
 		String role = ((CustomUserDetails)authentication.getPrincipal()).getRoleName();
 		User user = userService.getUserClassById(userId);
+		if(user == null) return ResponseEntity.status(404).body(restData);
 		User userCurrent = userService.getUserClassById(userCurrentId);
 
 		switch(role) {
@@ -166,7 +168,6 @@ public class UserController {
 				
 		}
 
-		RestData<?> restData = new RestData<>(404, "Not Found", ErrorMessage.ERR_RESOURCE_NOT_FOUND, null);
 		if(userResponse != null) 
 			restData = new RestData<>(200, null, "Thong tin cua user id: " + String.valueOf(userId), userResponse);
 		else return ResponseEntity.status(404).body(restData);

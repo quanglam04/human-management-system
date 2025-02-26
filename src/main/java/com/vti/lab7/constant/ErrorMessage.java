@@ -29,6 +29,7 @@ public class ErrorMessage {
 	public static class Role {
 		public static final String ERR_NOT_FOUND_ID = "error.role.not.found.id";
 		public static final String ERR_NOT_FOUND_NAME = "error.role.not.found.name";
+		public static final String ERR_NOT_EXIST_NAME = "error.role.name.exist";
 	}
 
 	public static class User {
@@ -45,11 +46,14 @@ public class ErrorMessage {
 
 	public static class Position {
 		public static final String ERR_NOT_FOUND_ID = "error.position.not.found.id";
+		public static final String ERR_ALREADY_EXIST = "error.position.existed";
+	
 	}
 
 	public static class Department {
 		public static final String ERR_NOT_FOUND_ID = "error.department.not.found.id";
 		public static final String ERR_DUPLICATE_NAME="error.department.name.exists";
+		public static final String ERR_HAS_EMPLOYEE="error.department.hasEmployee";
 	}
 
 	public static class Permission {

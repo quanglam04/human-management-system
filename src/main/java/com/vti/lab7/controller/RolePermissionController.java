@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vti.lab7.dto.RolePermissionDTO;
+import com.vti.lab7.model.Role;
+import com.vti.lab7.model.Permission;
 import com.vti.lab7.model.RolePermission;
 import com.vti.lab7.model.RolePermissionId;
 import com.vti.lab7.service.impl.RolePermissionServiceImpl;
@@ -34,16 +36,13 @@ public class RolePermissionController {
 
 	@GetMapping()
 	@PreAuthorize("hasAuthority('get_all_role_permissions')")
-	public ResponseEntity<List<RolePermissionDTO>> findAll() {
-		List<RolePermissionDTO> rolePermissionDTOs = rolePermissionServiceImpl.findAll().stream()
-				.map(rp -> new RolePermissionDTO(rp.getRole().getRoleId(), rp.getRole().getRoleName(),
-						rp.getPermission().getPermissionId(), rp.getPermission().getPermissionName()))
-				.collect(Collectors.toList());
+	public ResponseEntity<List<RolePermission>> findAll() {
+		List<RolePermission> rolePermissions = rolePermissionServiceImpl.findAll();
 
-		if (rolePermissionDTOs.isEmpty()) {
+		if (rolePermissions.isEmpty()) {
 			return ResponseEntity.noContent().build();
 		}
-		return ResponseEntity.ok(rolePermissionDTOs);
+		return ResponseEntity.ok(rolePermissions);
 	}
 
 	@GetMapping("/{roleId}/{permissionId}")
@@ -61,8 +60,8 @@ public class RolePermissionController {
 
 	@PostMapping()
 	@PreAuthorize("hasAuthority('create_new_role_permission')")
-	public ResponseEntity<RolePermission> createDepartment(@RequestBody RolePermission rolePermission) {
-		RolePermission savedRolePermission = rolePermissionServiceImpl.save(rolePermission);
+	public ResponseEntity<?> createRolePermissions(@RequestBody RolePermissionDTO rolePermissionDTO) {
+		RolePermission savedRolePermission = rolePermissionServiceImpl.saveRolePermission(rolePermissionDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedRolePermission);
 	}
 

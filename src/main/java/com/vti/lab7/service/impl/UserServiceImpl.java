@@ -43,6 +43,8 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import javax.security.sasl.AuthenticationException;
+
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -68,6 +70,7 @@ public class UserServiceImpl implements UserService {
 	private final AuthenticationManager authenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtTokenService jwtTokenService;
+
 	
 	public void init() {
 		if (userRepository.count() == 0) {
@@ -105,7 +108,6 @@ public class UserServiceImpl implements UserService {
             userRepository.saveAll(users);
 		}
 	}
-
 	public User getCurrentUser() {
 		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 		return userRepository.findByUsername(currentUsername)
@@ -125,7 +127,7 @@ public class UserServiceImpl implements UserService {
 
 	        return new LoginResponseDto(accessToken, refreshToken);
 	    } catch (BadCredentialsException e) {
-	        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sai tài khoản hoặc mật khẩu");
+	        throw new BadCredentialsException("");
 	    } catch (Exception e) {
 	        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi hệ thống, thử lại sau");
 	    }
