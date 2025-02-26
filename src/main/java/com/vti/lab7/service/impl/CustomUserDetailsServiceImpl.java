@@ -28,7 +28,7 @@ public class CustomUserDetailsServiceImpl implements CustomeUserDetailService {
 
 	UserRepository userRepository;
 
-	private Collection<? extends GrantedAuthority> mapToGrantedAuthorities(List<RolePermission> rolePermissions) {
+	public static Collection<? extends GrantedAuthority> mapToGrantedAuthorities(List<RolePermission> rolePermissions) {
 		return rolePermissions.stream()
 				.map(rolePermission -> new SimpleGrantedAuthority(rolePermission.getPermission().getPermissionName()))
 				.collect(Collectors.toSet());

@@ -36,6 +36,7 @@ public class ErrorMessage {
 		public static final String ERR_NOT_FOUND_EMAIL = "error.user.not.found.email";
 		public static final String ERR_NOT_FOUND_ID = "error.user.not.found.id";
 		public static final String ERR_USER_ALREADY_ASSIGNED = "error.user.already.assigned.to.employee";
+        public static final String ERR_INVALID_REFRESH_TOKEN = "error.auth.invalid.refresh.token";
 	}
 
 	public static class Employee {
