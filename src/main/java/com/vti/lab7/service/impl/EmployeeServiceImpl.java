@@ -24,7 +24,6 @@ import com.vti.lab7.dto.EmployeeDTO;
 import com.vti.lab7.dto.mapper.EmployeeMapper;
 import com.vti.lab7.dto.response.PaginationResponseDto;
 import com.vti.lab7.dto.response.PagingMeta;
-import com.vti.lab7.model.Employee;
 import com.vti.lab7.model.*;
 import com.vti.lab7.repository.DepartmentRepository;
 import com.vti.lab7.repository.EmployeeRepository;
@@ -278,7 +277,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	@Override
 	public void deleteEmployee(Long id) {
 		if (!employeeRepository.existsById(id)) {
-			throw new NotFoundException(ErrorMessage.Position.ERR_NOT_FOUND_ID, id);
+		throw new NotFoundException(ErrorMessage.Employee.ERR_NOT_FOUND_ID, id);
 		}
 		employeeRepository.deleteById(id);
 	}
