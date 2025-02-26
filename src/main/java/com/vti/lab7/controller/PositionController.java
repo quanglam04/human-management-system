@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.dto.PositionDTO;
 import com.vti.lab7.dto.mapper.PositionMapperDTO;
 import com.vti.lab7.dto.request.PositionRequestDTO;
@@ -102,7 +103,7 @@ public class PositionController {
         String positionName = request.getPositionName();
         boolean isExisted = positionServiceImpl.findAll().stream().anyMatch(x -> x.getPositionName().trim().equals(positionName));
         if(isExisted == true) {
-        	throw new BadRequestException("position.exist",positionName);
+        	throw new BadRequestException(com.vti.lab7.constant.ErrorMessage.Position.ERR_ALREADY_EXIST,positionName);
         }
 		Position savedPosition = positionServiceImpl.createPosition(request.getPositionName());
         PositionDTO savedPositionDTO = PositionMapperDTO.convertPositionDTO(savedPosition);

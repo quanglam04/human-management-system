@@ -45,6 +45,7 @@ public class ErrorMessage {
 
 	public static class Position {
 		public static final String ERR_NOT_FOUND_ID = "error.position.not.found.id";
+		public static final String ERR_ALREADY_EXIST = "error.position.existed";
 	}
 
 	public static class Department {
