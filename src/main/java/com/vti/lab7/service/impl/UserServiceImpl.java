@@ -68,6 +68,7 @@ public class UserServiceImpl implements UserService {
 	private final AuthenticationManager authenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtTokenService jwtTokenService;
+
 	
 	public void init() {
 		if (userRepository.count() == 0) {
@@ -105,7 +106,6 @@ public class UserServiceImpl implements UserService {
             userRepository.saveAll(users);
 		}
 	}
-
 	public User getCurrentUser() {
 		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 		return userRepository.findByUsername(currentUsername)

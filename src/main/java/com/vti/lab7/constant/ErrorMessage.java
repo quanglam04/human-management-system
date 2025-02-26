@@ -51,6 +51,7 @@ public class ErrorMessage {
 	public static class Department {
 		public static final String ERR_NOT_FOUND_ID = "error.department.not.found.id";
 		public static final String ERR_DUPLICATE_NAME="error.department.name.exists";
+		public static final String ERR_HAS_EMPLOYEE="error.department.hasEmployee";
 	}
 
 	public static class Permission {
