@@ -28,17 +28,21 @@ import com.vti.lab7.repository.EmployeeRepository;
 import com.vti.lab7.service.impl.EmployeeServiceImpl;
 import com.vti.lab7.service.impl.PositionServiceImpl;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/positions")
+@Tag(name = "Position Controller", description = "APIs for managing positions")
 public class PositionController {
 	private final PositionServiceImpl positionServiceImpl;
 	private final EmployeeRepository employeeRepository;
 	
 	@GetMapping()
+	@Operation(summary = "Get all positions")
 	public ResponseEntity<RestData<List<PositionDTO>>> getAllPosition(){
 		List<Position> positions = positionServiceImpl.findAll();
 		List<PositionDTO> positionsDTO = positions.stream().map(PositionMapperDTO::convertPositionDTO).toList();
@@ -52,6 +56,7 @@ public class PositionController {
 	}
 	
 	@GetMapping("/{id}")
+	@Operation(summary = "Get position by ID")
 	public ResponseEntity<RestData<PositionDTO>> getPositionByID(@PathVariable long id) throws  MethodArgumentTypeMismatchException{
 
 
@@ -69,6 +74,7 @@ public class PositionController {
 	
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('position_delete_by_id')")
+	@Operation(summary = "Delete position by ID")
     public ResponseEntity<RestData<Void>> deletePosition(@PathVariable Long id) throws  MethodArgumentTypeMismatchException {
 		Position position = positionServiceImpl.findById(id);
 		if(position == null)
@@ -91,6 +97,7 @@ public class PositionController {
 	
 	@PostMapping
 	@PreAuthorize("hasAuthority('position_create')")
+	@Operation(summary = "Create position")
     public ResponseEntity<RestData<PositionDTO>> createPosition(@Valid @RequestBody PositionRequestDTO request)  {	
         String positionName = request.getPositionName();
         boolean isExisted = positionServiceImpl.findAll().stream().anyMatch(x -> x.getPositionName().trim().equals(positionName));
@@ -109,6 +116,7 @@ public class PositionController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('position_update_by_id')")
+    @Operation(summary = "Update position by ID")
     public ResponseEntity<RestData<PositionDTO>> updatePosition(@PathVariable Long id, @RequestBody PositionRequestDTO request) throws MethodArgumentTypeMismatchException {
 
 
