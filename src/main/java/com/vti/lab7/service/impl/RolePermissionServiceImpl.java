@@ -9,6 +9,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vti.lab7.constant.RoleConstants;
+import com.vti.lab7.dto.RolePermissionDTO;
 import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.exception.custom.ConflictException;
 import com.vti.lab7.exception.custom.NotFoundException;
@@ -93,13 +94,23 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 				.orElseThrow(() -> new NotFoundException(ErrorMessage.RolePermissions.ERR_NOT_FOUND_ID)));
 	}
 
-	@Override
-	public RolePermission save(RolePermission rolePermission) {
+	public RolePermission saveRolePermission(RolePermissionDTO rolePermissionDTO) {
 		Optional<RolePermission> existRolePermission = rolePermissionRepository
-				.findPermissionById(rolePermission.getId().getPermissionId(), rolePermission.getId().getRoleId());
-		if (!existRolePermission.isEmpty()) {
+				.findPermissionById(rolePermissionDTO.getPermissionId(), rolePermissionDTO.getRoleId());
+
+		if (existRolePermission.isPresent()) {
 			throw new ConflictException(ErrorMessage.RolePermissions.ERR_DUPLICATE_ROLE_PERMISSION);
 		}
+
+		Role role = roleRepository.findById(rolePermissionDTO.getRoleId())
+				.orElseThrow(() -> new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND_ID));
+
+		Permission permission = permissionRepository.findById(rolePermissionDTO.getPermissionId())
+				.orElseThrow(() -> new NotFoundException(ErrorMessage.Permission.ERR_NOT_FOUND_ID));
+
+		RolePermission rolePermission = new RolePermission(
+				new RolePermissionId(role.getRoleId(), permission.getPermissionId()), role, permission);
+
 		return rolePermissionRepository.save(rolePermission);
 	}
 
@@ -125,5 +136,11 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
 	public List<RolePermission> getPermissionsByRoleId(Long roleId) {
 		return rolePermissionRepository.findById_RoleId(roleId);
+	}
+
+	@Override
+	public RolePermission save(RolePermission rolePermission) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
