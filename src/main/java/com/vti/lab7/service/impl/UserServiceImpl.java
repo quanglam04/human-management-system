@@ -40,6 +40,8 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import javax.security.sasl.AuthenticationException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -114,7 +116,7 @@ public class UserServiceImpl implements UserService {
 
 	        return new LoginResponseDto(accessToken, refreshToken);
 	    } catch (BadCredentialsException e) {
-	        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sai tài khoản hoặc mật khẩu");
+	        throw new BadCredentialsException("");
 	    } catch (Exception e) {
 	        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi hệ thống, thử lại sau");
 	    }
