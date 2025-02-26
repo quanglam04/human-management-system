@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
 			jwtTokenService.blacklistAccessToken(accessToken);
 		}
 
-		if (refreshToken != null) {
+		if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken) && jwtTokenProvider.isRefreshToken(refreshToken)) {
 			// Lưu refreshToken vào blacklist
 			jwtTokenService.blacklistRefreshToken(refreshToken);
 		}
@@ -158,10 +158,10 @@ public class UserServiceImpl implements UserService {
 	public TokenRefreshResponseDto refresh(TokenRefreshRequestDto request) {
 		String refreshToken = request.getRefreshToken();
 
-		if (jwtTokenProvider.validateToken(refreshToken)) {
-			String userId = jwtTokenProvider.extractSubjectFromJwt(refreshToken);
+		if (jwtTokenProvider.validateToken(refreshToken) && jwtTokenProvider.isRefreshToken(refreshToken)) {
+			Long userId = jwtTokenProvider.extractSubjectFromJwt(refreshToken);
 			if (userId != null && jwtTokenService.isTokenAllowed(refreshToken)) {
-				User user = userRepository.findById(Long.valueOf(userId))
+				User user = userRepository.findById(userId)
 						.orElseThrow(() -> new BadRequestException(ErrorMessage.User.ERR_INVALID_REFRESH_TOKEN));
 				CustomUserDetails userDetails = new CustomUserDetails(user.getUserId(), user.getUsername(), user.getPassword(),
 						user.getRole().getRoleName(),CustomUserDetailsServiceImpl. mapToGrantedAuthorities(user.getRole().getRolePermissions()));
