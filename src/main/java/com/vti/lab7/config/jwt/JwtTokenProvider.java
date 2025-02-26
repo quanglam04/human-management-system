@@ -3,7 +3,6 @@ package com.vti.lab7.config.jwt;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import com.vti.lab7.config.CustomUserDetails;
@@ -11,7 +10,6 @@ import com.vti.lab7.config.CustomUserDetails;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -20,8 +18,6 @@ public class JwtTokenProvider {
 	private static final String CLAIM_TYPE = "type";
 	private static final String TYPE_ACCESS = "access";
 	private static final String TYPE_REFRESH = "refresh";
-	private static final String CARD_NUMBER_KEY = "card-number";
-	private static final String AUTHORITIES_KEY = "auth";
 
 	@Value("${jwt.secret:76947ef7-7af1-4745-bfda-ab2d5cb09290}")
 	private String SECRET_KEY;
@@ -33,20 +29,14 @@ public class JwtTokenProvider {
 	private int EXPIRATION_TIME_REFRESH_TOKEN;
 
 	public String generateToken(CustomUserDetails userDetails, Boolean isRefreshToken) {
-		String authorities = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-				.collect(Collectors.joining(","));
 		Map<String, Object> claim = new HashMap<>();
 		claim.put(CLAIM_TYPE, isRefreshToken ? TYPE_REFRESH : TYPE_ACCESS);
-		claim.put(AUTHORITIES_KEY, authorities);
-		if (isRefreshToken) {
-			return Jwts.builder().setClaims(claim).setSubject(String.valueOf(userDetails.getUserId()))
-					.setIssuedAt(new Date(System.currentTimeMillis()))
-					.setExpiration(new Date(System.currentTimeMillis() + (EXPIRATION_TIME_REFRESH_TOKEN * 60L * 1000L)))
-					.signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
-		}
+
+		long expirationTime = isRefreshToken ? EXPIRATION_TIME_REFRESH_TOKEN : EXPIRATION_TIME_ACCESS_TOKEN;
+
 		return Jwts.builder().setClaims(claim).setSubject(String.valueOf(userDetails.getUserId()))
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + (EXPIRATION_TIME_ACCESS_TOKEN * 60L * 1000L)))
+				.setExpiration(new Date(System.currentTimeMillis() + (expirationTime * 60L * 1000L)))
 				.signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
 	}
 
@@ -68,17 +58,58 @@ public class JwtTokenProvider {
 		return false;
 	}
 
-	public String extractSubjectFromJwt(String token) {
-		return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
+	public Long extractSubjectFromJwt(String token) {
+		try {
+			return Long.parseLong(getClaims(token).getSubject());
+		} catch (Exception ex) {
+			log.error("Unable to extract subject from token");
+			return null;
+		}
 	}
 
-	public String extractClaimCardNumber(String token) {
-		Object cardNumber = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody()
-				.get(CARD_NUMBER_KEY);
-		if (cardNumber != null) {
-			return cardNumber.toString();
+	public long getExpirationTime(String token) {
+		try {
+			return getClaims(token).getExpiration().getTime();
+		} catch (Exception ex) {
+			log.error("Unable to get expiration time from token");
+			return -1;
 		}
-		return null;
+	}
+
+	public boolean isTokenExpired(String token) {
+		long expirationTime = getExpirationTime(token);
+		return expirationTime > 0 && expirationTime < System.currentTimeMillis();
+	}
+
+	public long getRemainingTime(String token) {
+		long expirationTime = getExpirationTime(token);
+		if (expirationTime < 0) {
+			return 0;
+		}
+		long remainingTime = expirationTime - System.currentTimeMillis();
+		return Math.max(remainingTime, 0);
+	}
+
+	public boolean isRefreshToken(String token) {
+		try {
+			return TYPE_REFRESH.equals(getClaims(token).get(CLAIM_TYPE));
+		} catch (Exception ex) {
+			log.error("Unable to determine token type");
+			return false;
+		}
+	}
+
+	public boolean isAccessToken(String token) {
+		try {
+			return TYPE_ACCESS.equals(getClaims(token).get(CLAIM_TYPE));
+		} catch (Exception ex) {
+			log.error("Unable to determine token type");
+			return false;
+		}
+	}
+
+	private Claims getClaims(String token) {
+		return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
 	}
 
 }
