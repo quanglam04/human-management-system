@@ -10,10 +10,13 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vti.lab7.constant.ErrorMessage;
+import com.vti.lab7.dto.EmployeeDTO;
 import com.vti.lab7.exception.custom.ConflictException;
 import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Department;
 import com.vti.lab7.repository.DepartmentRepository;
+import com.vti.lab7.repository.EmployeeRepository;
+import com.vti.lab7.service.EmployeeService;
 import com.vti.lab7.service.IDeparmentService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -24,6 +27,8 @@ public class DepartmentService implements IDeparmentService {
 	@Autowired
 	private DepartmentRepository departmentRepository;
 
+	@Autowired
+	private EmployeeService employeeService;
 	@Override
 	public Optional<Department> findDepartment(Long id) {
 		return Optional.ofNullable(departmentRepository.findById(id)
@@ -63,6 +68,11 @@ public class DepartmentService implements IDeparmentService {
 	public void deleteDepartment(Long id) {
 		if (!departmentRepository.existsById(id)) {
 			throw new NotFoundException("error.department.notfound");
+		}
+		
+		List<EmployeeDTO> employees=employeeService.getEmployeesByDepartment(id);
+		if(!employees.isEmpty()) {
+			throw new ConflictException(ErrorMessage.Department.ERR_HAS_EMPLOYEE);
 		}
 		departmentRepository.deleteById(id);
 	}
