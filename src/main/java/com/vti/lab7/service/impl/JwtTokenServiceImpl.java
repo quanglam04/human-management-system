@@ -1,5 +1,6 @@
 package com.vti.lab7.service.impl;
 
+import com.vti.lab7.config.jwt.JwtTokenProvider;
 import com.vti.lab7.service.JwtTokenService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +24,18 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
 	final RedisTemplate<String, Object> redisTemplate;
 
+	final JwtTokenProvider jwtTokenProvider;
+
 	@Override
 	public void blacklistAccessToken(String accessToken) {
-		redisTemplate.opsForValue().set(accessToken, "blacklisted", expirationTimeAccessToken, TimeUnit.MINUTES);
+		redisTemplate.opsForValue().set(accessToken, "blacklisted", jwtTokenProvider.getRemainingTime(accessToken),
+				TimeUnit.MILLISECONDS);
 	}
 
 	@Override
 	public void blacklistRefreshToken(String refreshToken) {
-		redisTemplate.opsForValue().set(refreshToken, "blacklisted", expirationTimeRefreshToken, TimeUnit.MINUTES);
+		redisTemplate.opsForValue().set(refreshToken, "blacklisted", jwtTokenProvider.getRemainingTime(refreshToken),
+				TimeUnit.MILLISECONDS);
 	}
 
 	@Override
