@@ -1,6 +1,7 @@
 package com.vti.lab7.service.impl;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -8,31 +9,33 @@ import com.vti.lab7.config.CustomUserDetails;
 import com.vti.lab7.config.jwt.JwtTokenProvider;
 import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.constant.RoleConstants;
-import com.vti.lab7.dto.EmployeeDTO;
 import com.vti.lab7.dto.request.LoginRequestDto;
 import com.vti.lab7.dto.request.NewUserRequest;
+import com.vti.lab7.dto.request.TokenRefreshRequestDto;
 import com.vti.lab7.dto.request.UpdateUserRequest;
 import com.vti.lab7.dto.request.UserRequest;
 import com.vti.lab7.dto.response.LoginResponseDto;
-import com.vti.lab7.dto.response.PaginationResponseDto;
+import com.vti.lab7.dto.response.TokenRefreshResponseDto;
 import com.vti.lab7.dto.response.UserDTO;
 import com.vti.lab7.dto.response.UserResponse;
-import com.vti.lab7.exception.custom.ForbiddenException;
+import com.vti.lab7.exception.custom.BadRequestException;
 import com.vti.lab7.exception.custom.NotFoundException;
 import com.vti.lab7.model.Department;
 import com.vti.lab7.model.Employee;
-import com.vti.lab7.model.Position;
 import com.vti.lab7.model.Role;
 import com.vti.lab7.model.User;
 import com.vti.lab7.repository.EmployeeRepository;
 import com.vti.lab7.repository.PositionRepository;
 import com.vti.lab7.repository.RoleRepository;
 import com.vti.lab7.repository.UserRepository;
-import com.vti.lab7.service.EmployeeService;
+import com.vti.lab7.service.JwtTokenService;
 import com.vti.lab7.service.UserService;
 import com.vti.lab7.specification.UserSpecification;
+import com.vti.lab7.util.JwtUtil;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +43,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,7 +55,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import static com.vti.lab7.constant.RoleConstants.*;
 
 @Service
@@ -68,7 +67,8 @@ public class UserServiceImpl implements UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
 	private final JwtTokenProvider jwtTokenProvider;
-
+	private final JwtTokenService jwtTokenService;
+	
 	public void init() {
 		if (userRepository.count() == 0) {
 			// Tạo user Admin
@@ -129,6 +129,51 @@ public class UserServiceImpl implements UserService {
 	    } catch (Exception e) {
 	        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi hệ thống, thử lại sau");
 	    }
+	}
+	
+	@Override
+	public void logout(
+			HttpServletRequest request,
+			HttpServletResponse response,
+			Authentication authentication
+	) {
+		String accessToken = JwtUtil.extractTokenFromRequest(request);
+		String refreshToken = JwtUtil.extractRefreshTokenFromRequest(request);
+
+		if (accessToken != null) {
+			// Lưu accessToken vào blacklist
+			jwtTokenService.blacklistAccessToken(accessToken);
+		}
+
+		if (refreshToken != null) {
+			// Lưu refreshToken vào blacklist
+			jwtTokenService.blacklistRefreshToken(refreshToken);
+		}
+
+		SecurityContextLogoutHandler logout = new SecurityContextLogoutHandler();
+		logout.logout(request, response, authentication);
+	}
+	 
+	@Override
+	public TokenRefreshResponseDto refresh(TokenRefreshRequestDto request) {
+		String refreshToken = request.getRefreshToken();
+
+		if (jwtTokenProvider.validateToken(refreshToken)) {
+			String userId = jwtTokenProvider.extractSubjectFromJwt(refreshToken);
+			if (userId != null && jwtTokenService.isTokenAllowed(refreshToken)) {
+				User user = userRepository.findById(Long.valueOf(userId))
+						.orElseThrow(() -> new BadRequestException(ErrorMessage.User.ERR_INVALID_REFRESH_TOKEN));
+				CustomUserDetails userDetails = new CustomUserDetails(user.getUserId(), user.getUsername(), user.getPassword(),
+						user.getRole().getRoleName(),CustomUserDetailsServiceImpl. mapToGrantedAuthorities(user.getRole().getRolePermissions()));
+
+				String newAccessToken = jwtTokenProvider.generateToken(userDetails, Boolean.FALSE);
+				String newRefreshToken = jwtTokenProvider.generateToken(userDetails, Boolean.TRUE);
+
+				return new TokenRefreshResponseDto(newAccessToken, newRefreshToken);
+			}
+		}
+
+		throw new BadRequestException(ErrorMessage.User.ERR_INVALID_REFRESH_TOKEN);
 	}
 
 	@Override
