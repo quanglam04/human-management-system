@@ -63,7 +63,7 @@ public class PositionController {
 
 		Position position = positionServiceImpl.findById(id);
 		if(position == null)
-			throw new NotFoundException("Id invalid");
+			throw new NotFoundException(ErrorMessage.Position.ERR_NOT_FOUND_ID);
 		RestData<PositionDTO> restData = new RestData<>();
 		restData.setData(PositionMapperDTO.convertPositionDTO(position));
 		restData.setError("null");
@@ -79,7 +79,7 @@ public class PositionController {
     public ResponseEntity<RestData<Void>> deletePosition(@PathVariable Long id) throws  MethodArgumentTypeMismatchException {
 		Position position = positionServiceImpl.findById(id);
 		if(position == null)
-			throw new NotFoundException("Id invalid");
+			throw new NotFoundException(ErrorMessage.Position.ERR_NOT_FOUND_ID);
 		List<Employee> employees = employeeRepository.findByPositionPositionId(id);
 		System.out.println(">>>>>>>"+employees);
 		for (Employee e : employees) {
@@ -103,7 +103,7 @@ public class PositionController {
         String positionName = request.getPositionName();
         boolean isExisted = positionServiceImpl.findAll().stream().anyMatch(x -> x.getPositionName().trim().equals(positionName));
         if(isExisted == true) {
-        	throw new BadRequestException(com.vti.lab7.constant.ErrorMessage.Position.ERR_ALREADY_EXIST,positionName);
+        	throw new BadRequestException(ErrorMessage.Position.ERR_ALREADY_EXIST,positionName);
         }
 		Position savedPosition = positionServiceImpl.createPosition(request.getPositionName());
         PositionDTO savedPositionDTO = PositionMapperDTO.convertPositionDTO(savedPosition);
@@ -123,7 +123,7 @@ public class PositionController {
 
     	Position position = positionServiceImpl.findById(id);
 		if(position == null)
-			throw new NotFoundException("Id invalid");
+			throw new NotFoundException(ErrorMessage.Position.ERR_NOT_FOUND_ID);
 		position.setPositionName(request.getPositionName());
         Position updatedPosition = positionServiceImpl.updatePosition(position);
         PositionDTO updatedPositionDTO = PositionMapperDTO.convertPositionDTO(updatedPosition);

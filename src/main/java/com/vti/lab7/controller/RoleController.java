@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import com.vti.lab7.constant.ErrorMessage;
 import com.vti.lab7.dto.RoleDTO;
 import com.vti.lab7.dto.mapper.RoleMapperDTO;
 import com.vti.lab7.dto.request.RoleRequestDTO;
@@ -73,7 +75,7 @@ public class RoleController {
 
 		Role role = roleServiceImpl.findById(id);
 		if (role == null)
-			throw new NotFoundException("Id invalid");
+			throw new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND_ID,id);
 		roleServiceImpl.deleteById(id);
 		return ResponseEntity.ok("Delete role success");
 	}
@@ -88,7 +90,7 @@ public class RoleController {
 		List<String> roleNames = roleServiceImpl.findAll().stream().map(x -> x.getRoleName()).toList();
 		for(String roleName : roleNames )
 			if(roleName.toLowerCase().trim().equals(roleNameRequest.toLowerCase().trim()))
-				throw new ConflictException("error.role.name.exist",roleName );
+				throw new ConflictException(ErrorMessage.Role.ERR_NOT_EXIST_NAME,roleName );
 		role.setDescription(roleRequestDTO.getDescription());
 		role.setRoleName(roleRequestDTO.getRoleName());
 		
@@ -110,12 +112,12 @@ public class RoleController {
 		Role role = roleServiceImpl.findById(id);
 		RestData<RoleDTO> restData = new RestData<>();
 		if(role == null)
-			throw new NotFoundException("ID invalid");
+			throw new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND_ID);
 		
 		List<String> roleNames = roleServiceImpl.findAll().stream().map(x -> x.getRoleName()).toList();
 		for(String roleName : roleNames )
 			if(roleName.toLowerCase().equals(roleRequestDTO.getRoleName().toLowerCase()))
-				throw new ConflictException("error.role.name.exist",roleName );
+				throw new ConflictException(ErrorMessage.Role.ERR_NOT_FOUND_NAME,roleName );
 		role.setDescription(roleRequestDTO.getDescription().trim());
 		role.setRoleName(roleRequestDTO.getRoleName().trim());
 		roleServiceImpl.updateRole(role);
