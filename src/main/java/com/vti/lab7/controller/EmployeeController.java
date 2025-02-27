@@ -62,7 +62,7 @@ public class EmployeeController {
 
 		EmployeeDTO responseDto = employeeService.createEmployee(employee, currentUser);
 
-		RestData<?> restData = new RestData<>(200, null, null, responseDto);
+		RestData<?> restData = new RestData<>(200, null, "Employee created successfully.", responseDto);
 		return ResponseEntity.ok().body(restData);
 	}
 
@@ -74,7 +74,7 @@ public class EmployeeController {
 		CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
 
 		EmployeeDTO responseDto = employeeService.updateEmployee(id, employee, currentUser);
-		RestData<?> restData = new RestData<>(200, null, null, responseDto);
+		RestData<?> restData = new RestData<>(200, null, "Employee updated successfully.", responseDto);
 
 		return ResponseEntity.ok().body(restData);
 	}
