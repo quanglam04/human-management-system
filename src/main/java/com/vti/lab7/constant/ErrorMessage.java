@@ -41,7 +41,9 @@ public class ErrorMessage {
 	}
 
 	public static class Employee {
-		public static final String ERR_NOT_FOUND_ID = "error.employee.not.found.id";
+		public static final String ERR_NOT_FOUND_ID = "error.employee.not_found.id";
+		public static final String ERR_MANAGER_NO_DEPARTMENT = "error.manager.no_department";
+		public static final String ERR_USER_NO_EMPLOYEE = "error.user.no_employee";
 	}
 
 	public static class Position {
