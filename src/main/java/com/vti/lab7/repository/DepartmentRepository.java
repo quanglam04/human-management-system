@@ -14,4 +14,8 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 
 	@Query("SELECT d.departmentId FROM Department d JOIN d.employees e JOIN e.user u WHERE u.username = :username")
 	Long findDepartmentIdByUsername(@Param("username") String username);
+
+	@Query("SELECT COUNT(e) FROM Employee e JOIN e.department d WHERE d.departmentId = :departmentId")
+	Long countEmployeesByDepartmentId(@Param("departmentId") Long departmentId);
+
 }

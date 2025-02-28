@@ -29,17 +29,10 @@ public class PermissionServiceImpl implements PermissionService {
 			Map.entry("delete_department_by_id", "Xóa các văn phòng"),
 
 			// Employee
-			Map.entry("employee_read_all", "Xem danh sách tất cả nhân viên"),
-			Map.entry("employee_read_department", "Xem danh sách nhân viên thuộc phòng ban của mình"),
-			Map.entry("employee_read_self", "Xem thông tin của chính mình"),
-			Map.entry("employee_create_all", "Tạo nhân viên mới với bất kỳ vai trò nào"),
-			Map.entry("employee_create_department", "Tạo nhân viên mới với vai trò Employee cho phòng ban của mình"),
-			Map.entry("employee_update_all", "Cập nhật thông tin của bất kỳ nhân viên nào"),
-			Map.entry("employee_update_department", "Cập nhật thông tin của nhân viên thuộc phòng ban của mình"),
-			Map.entry("employee_update_self", "Cập nhật thông tin của chính mình"),
-			Map.entry("employee_delete_all", "Xóa bất kỳ nhân viên nào"),
-			Map.entry("read_employee_by_department", "Xem danh sách nhân viên thuộc một phòng ban cụ thể"),
-			Map.entry("read_employee_by_position", "Xem danh sách nhân viên thuộc một vị trí cụ thể"),
+			Map.entry("read_employee", "Xem danh sách tất cả nhân viên"),
+			Map.entry("create_employee", "Tạo nhân viên mới với bất kỳ vai trò nào"),
+			Map.entry("update_employee", "Cập nhật thông tin nhân viên"),
+			Map.entry("delete_employee", "Xóa nhân viên khỏi hệ thống"),
 
 			// Permission
 			Map.entry("read_permission", "Xem danh sách và chi tiết quyền"),

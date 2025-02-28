@@ -56,8 +56,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 					"get_all_departments", "get_department_by_id",
 
 					// Employee
-					"employee_read_department", "employee_read_self", "employee_create_department",
-					"employee_update_department", "employee_update_self",
+					"read_employee", "create_employee", "update_employee",
 
 					// Role
 					"role_read_all", "role_read_role_by_id", "get_role_by_permissions_id",
@@ -71,7 +70,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
 			assignPermissionsToRole(RoleConstants.EMPLOYEE, permissionRepository.findByPermissionNameIn(List.of(
 					// Employee
-					"employee_read_self", "employee_update_self",
+					"read_employee", "update_employee",
 
 					// User
 					"get_own_info", "update_own_info")));
