@@ -60,7 +60,7 @@ public class ErrorMessage {
 
 	public static class Permission {
 		public static final String ERR_NOT_FOUND_ID = "error.permission.not.found.id";
-		public static final String ERR_DUPLICATE_NAME = "error.permission.duplicate.username.email";
+		public static final String ERR_DUPLICATE_NAME = "error.permission.duplicate.name";
 	}
 	public static class RolePermissions{
 		public static final String ERR_NOT_FOUND_ID="ole-permission not found";

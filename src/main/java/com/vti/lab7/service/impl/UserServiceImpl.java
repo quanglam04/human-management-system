@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final JwtTokenService jwtTokenService;
 
-	
+
 	public void init() {
 		if (userRepository.count() == 0) {
 			// Tạo user Admin
@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByUsername(currentUsername)
 				.orElseThrow(() -> new NotFoundException(ErrorMessage.User.ERR_NOT_FOUND_USERNAME, currentUsername));
 	}
-	
+
 	public LoginResponseDto login(LoginRequestDto request) {
 	    try {
 	        Authentication authentication = authenticationManager.authenticate(
@@ -132,7 +132,7 @@ public class UserServiceImpl implements UserService {
 	        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Lỗi hệ thống, thử lại sau");
 	    }
 	}
-	
+
 	@Override
 	public void logout(
 			HttpServletRequest request,
@@ -155,14 +155,13 @@ public class UserServiceImpl implements UserService {
 		SecurityContextLogoutHandler logout = new SecurityContextLogoutHandler();
 		logout.logout(request, response, authentication);
 	}
-	 
+
 	@Override
 	public TokenRefreshResponseDto refresh(TokenRefreshRequestDto request) {
 		String refreshToken = request.getRefreshToken();
-
-		if (jwtTokenProvider.validateToken(refreshToken) && jwtTokenProvider.isRefreshToken(refreshToken)) {
+		if (jwtTokenProvider.validateToken(refreshToken) && jwtTokenProvider.isRefreshToken(refreshToken) && jwtTokenService.isTokenAllowed(refreshToken)) {
 			Long userId = jwtTokenProvider.extractSubjectFromJwt(refreshToken);
-			if (userId != null && jwtTokenService.isTokenAllowed(refreshToken)) {
+			if (userId != null) {
 				User user = userRepository.findById(userId)
 						.orElseThrow(() -> new BadRequestException(ErrorMessage.User.ERR_INVALID_REFRESH_TOKEN));
 				CustomUserDetails userDetails = new CustomUserDetails(user.getUserId(), user.getUsername(), user.getPassword(),
@@ -170,6 +169,9 @@ public class UserServiceImpl implements UserService {
 
 				String newAccessToken = jwtTokenProvider.generateToken(userDetails, Boolean.FALSE);
 				String newRefreshToken = jwtTokenProvider.generateToken(userDetails, Boolean.TRUE);
+
+				// Lưu refreshToken vào blacklist
+				jwtTokenService.blacklistRefreshToken(refreshToken);
 
 				return new TokenRefreshResponseDto(newAccessToken, newRefreshToken);
 			}
@@ -185,7 +187,7 @@ public class UserServiceImpl implements UserService {
                 request.getSize(),
                 Sort.by(Sort.Direction.fromString(request.getSortDirection()), request.getSortBy())
         );
-		
+
 		Specification<User> spec = Specification
 				.where(UserSpecification.hasUsername(request.getUsername()))
 				.and(UserSpecification.hasEmail(request.getEmail()));
@@ -224,7 +226,7 @@ public class UserServiceImpl implements UserService {
 		user.setEmail(request.getEmail());
 		user.setRole(roleRepository.findByRoleName(request.getRole()).orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
 		userRepository.save(user);
-		
+
 		return new UserResponse(user);
 	}
 	@Override
@@ -235,19 +237,19 @@ public class UserServiceImpl implements UserService {
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setEmail(request.getEmail());
 		user.setRole(roleRepository.findByRoleName(EMPLOYEE).orElseThrow(() -> new EntityNotFoundException("Khong tim thay role")));
-		
+
 		Employee em = new Employee();
 		em.setUser(user);
 		em.setDepartment(department);
 		em.setPosition(positionRepository.findByPositionName("developer").orElseThrow(() -> new EntityNotFoundException("Không tồn tại position")));
-		
+
 		user.setEmployee(em);
-		
+
 		userRepository.save(user);
 		employeeRepository.save(em);
 		return new UserResponse(user);
 	}
-	
+
 	@Override
 	public User getUserClassById(long userId) {
 		return userRepository.findByUserId(userId).orElse(null);
@@ -267,13 +269,13 @@ public class UserServiceImpl implements UserService {
 	    if (userRequest.getRole() != null && !userRequest.getRole().isBlank()) {
 	        Role newRole = roleRepository.findByRoleName(userRequest.getRole())
 	        		.orElseThrow(() -> new EntityNotFoundException("Khong tim thay role"));
-	                
+
 	        user.setRole(newRole);
 	    }
 
-	    
+
 	    userRepository.save(user);
-	    
+
 		return new UserDTO(user);
 	}
 
@@ -285,12 +287,12 @@ public class UserServiceImpl implements UserService {
 	    if (userRequest.getRole() != null && !userRequest.getRole().isBlank()) {
 	        Role newRole = roleRepository.findByRoleName(userRequest.getRole())
 	        		.orElseThrow(() -> new EntityNotFoundException("Khong tim thay role"));
-	                
+
 	        user.setRole(newRole);
 	    }
-	    
+
 	    userRepository.save(user);
-	    
+
 		return new UserDTO(user);
 	}
 
@@ -302,6 +304,6 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(userId);
 	}
 
-	
+
 
 }

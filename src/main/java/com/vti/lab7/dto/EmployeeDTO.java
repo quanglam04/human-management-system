@@ -1,5 +1,6 @@
 package com.vti.lab7.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -52,10 +53,12 @@ public class EmployeeDTO {
     private Long departmentId;
 
     @AssertTrue(message = "Hire date must be after date of birth")
+    @JsonIgnore
     public boolean isHireDateValid() {
         if (dateOfBirth != null && hireDate != null) {
             return hireDate.toLocalDate().isAfter(dateOfBirth.toLocalDate());
         }
         return true;
     }
+
 }

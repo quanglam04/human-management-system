@@ -105,7 +105,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 				.orElseThrow(() -> new NotFoundException(ErrorMessage.Role.ERR_NOT_FOUND_ID));
 
 		Permission permission = permissionRepository.findById(rolePermissionDTO.getPermissionId())
-				.orElseThrow(() -> new NotFoundException(ErrorMessage.Permission.ERR_NOT_FOUND_ID));
+				.orElseThrow(() -> new NotFoundException(ErrorMessage.Permission.ERR_NOT_FOUND_ID, rolePermissionDTO.getPermissionId()));
 
 		RolePermission rolePermission = new RolePermission(
 				new RolePermissionId(role.getRoleId(), permission.getPermissionId()), role, permission);
