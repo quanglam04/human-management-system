@@ -40,7 +40,8 @@ src/
 │       │   ├── messages.properties
 │       │   ├── messages_vi.properties
 │       │   └── messages_ja.properties
-│       └── application.properties     # Cấu hình ứng dụng Spring Boot
+│       ├── application.properties     # Cấu hình ứng dụng Spring Boot
+|       |── log4j2.xml                 # Cấu hình log cho ứng dụng
 </pre>
 
 ---
