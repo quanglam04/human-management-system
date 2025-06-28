@@ -46,26 +46,7 @@ src/
 
 ---
 
-## 3. Chức năng chính
-
-### 👤 Người dùng
-
-- Đăng ký, đăng nhập, quên mật khẩu
-- Cập nhật thông tin cá nhân, đổi mật khẩu
-- Xem sản phẩm, chi tiết sản phẩm
-- Thêm sản phẩm vào giỏ hàng
-- Đặt hàng và theo dõi lịch sử mua hàng
-
-### 🛠️ Quản trị viên
-
-- Quản lý sản phẩm (thêm, sửa, xóa)
-- Quản lý đơn hàng
-- Quản lý người dùng
-- Xem dashboard thống kê
-
----
-
-## 4. Hướng dẫn chạy dự án
+## 3. Hướng dẫn chạy dự án
 
 ### Cách 1: Dùng Docker Compose (khuyên dùng)
 
@@ -120,7 +101,7 @@ docker run -d --name redis-container -p 6379:6379 redis
 http://localhost:8080/swagger-ui.html
 ```
 
-## 5. Công nghệ sử dụng
+## 4. Công nghệ sử dụng
 
 - Java (17)
 - Spring Boot
